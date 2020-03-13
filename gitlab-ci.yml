@@ -1,0 +1,13 @@
+image: ubuntu
+# TODO: build image
+
+stages:
+  - test
+
+before_script:
+  - date && date -u
+
+unit_tests:
+  stage: test
+  script:
+    - test/stub.py
