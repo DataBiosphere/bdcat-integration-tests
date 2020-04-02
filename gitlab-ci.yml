@@ -6,8 +6,9 @@ stages:
 
 before_script:
   - date && date -u
+  - pip install -r requirements.txt
 
 unit_tests:
   stage: test
   script:
-    - test/stub.py
+    - test/test_basic_submission.py
