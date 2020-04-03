@@ -1,1 +1,3 @@
-firecloud
+google-cloud-secret-manager==0.2.0
+gen3==2.2.3
+firecloud==0.16.26
