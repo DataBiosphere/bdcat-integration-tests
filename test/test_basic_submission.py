@@ -22,7 +22,8 @@ class TestGen3DataAccess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.gen3_endpoint = 'https://gen3.biodatacatalyst.nhlbi.nih.gov'
-        cls.gen3_key = json.loads(os.environ['GEN3KEY'])
+        with open(os.environ['GEN3KEY'], 'r') as f:
+            cls.gen3_key = json.loads(f.read())
         cls.gen3_auth_client = Gen3Auth(endpoint=cls.gen3_endpoint, refresh_token=cls.gen3_key)
         cls.gen3_sub_client = Gen3Submission(endpoint=cls.gen3_endpoint, auth_provider=cls.gen3_auth_client)
 
