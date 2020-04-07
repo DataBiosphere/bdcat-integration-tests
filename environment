@@ -1,0 +1,3 @@
+set -a
+GOOGLE_PROJECT_ID='platform-dev'
+set +a
