@@ -1,3 +1,5 @@
 set -a
-GOOGLE_PROJECT_ID='platform-dev'
+GOOGLE_PROJECT_NAME='platform-dev'
+GOOGLE_PROJECT_ID='platform-dev-178517'
+# GEN3KEY='/home/quokka/Downloads/credentials.json'
 set +a
