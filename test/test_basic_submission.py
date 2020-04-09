@@ -65,7 +65,7 @@ class TestGen3DataAccess(unittest.TestCase):
 
         # # If :attr:`user_project` is set on the bucket, bills the API request to that project... otherwise:
         # # BadRequestException: 400 Bucket is requester pays bucket but no user project provided.
-        # blob.download_to_filename(filename=download_path)
+        blob.download_to_filename(filename=download_path)
 
         # Even still we're not allowed >.> :
         # quokka@qcore:~$ gsutil -u platform-dev-178517 cp gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_HG01131/analysis/HG01131.final.cram.crai .
@@ -73,11 +73,11 @@ class TestGen3DataAccess(unittest.TestCase):
 
         # TODO: Add the test account to platform-dev for requester pays billing
 
-        # expected_md5sums = [checksum for checksum in json_response['dos']['data_object']['checksums'] if checksum['type'] == 'md5']
-        # assert len(expected_md5sums) == 1
-        # expected_md5sum = expected_md5sums[0]
-        #
-        # assert md5sum(download_path) == expected_md5sum
+        expected_md5sums = [checksum for checksum in json_response['dos']['data_object']['checksums'] if checksum['type'] == 'md5']
+        assert len(expected_md5sums) == 1
+        expected_md5sum = expected_md5sums[0]
+        
+        assert md5sum(download_path) == expected_md5sum
         # print(md5sum(download_path))
         #
         # print("Terra download finished: {download_path}")
