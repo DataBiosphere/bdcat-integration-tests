@@ -14,3 +14,11 @@ unit_tests:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate && pip install -r requirements.txt
     - test/test_basic_submission.py
+
+scheduled_tests:
+  only:
+    - schedules
+  script:
+    - source environment
+    - virtualenv -p python3.8 venv && . venv/bin/activate && pip install -r requirements.txt
+    - test/test_basic_submission.py
