@@ -2,6 +2,12 @@
 
 This supports integration testing between components for the biodata catalyst grant.
 
+Add the script: `scripts/run_integration_tests.py` with appropriate tokens to your workflow will add these tests to your test suite.
+
+---------------------------------
+---------------------------------
+---------------------------------
+
 Server hosted tests here: https://biodata-integration-tests.net/
 
 Initial testing to create end-to-end tests representing the user process of uploading, investigating, running, and analyzing results on the Biodata Catalyst platform.
