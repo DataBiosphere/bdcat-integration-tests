@@ -10,7 +10,6 @@ from requests.exceptions import HTTPError
 
 from terra_notebook_utils import gs, GS_SCHEMA
 
-
 GEN3_ENDPOINTS = {
     'staging': 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/',
     'prod': 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'

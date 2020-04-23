@@ -16,10 +16,10 @@ from gen3.auth import Gen3Auth
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
-from test.utils import retry, fetch_terra_drs_url, md5sum, download, GEN3_ENDPOINTS
+from test.utils import retry, fetch_terra_drs_url, md5sum, download, GEN3_ENDPOINTS, GS_SCHEMA
 
 logger = logging.getLogger(__name__)
-gs_prefix = 'gs://'
+
 
 
 class TestGen3DataAccess(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestGen3DataAccess(unittest.TestCase):
         #                          'urls':
         #                          [{'url': 'gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_HG01131/analysis/HG01131.final.cram.crai'}],
         #                          'version': 'd87455aa'}}}
-        google_url_paths = [url['url'] for url in json_response['dos']['data_object']['urls'] if url['url'].startswith(gs_prefix)]
+        google_url_paths = [url['url'] for url in json_response['dos']['data_object']['urls'] if url['url'].startswith(GS_SCHEMA)]
 
         assert len(google_url_paths) == 1
         google_url_path = google_url_paths[0]
