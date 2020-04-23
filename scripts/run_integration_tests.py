@@ -1,6 +1,7 @@
 import requests
 import time
 import os
+import sys
 import argparse
 
 PRIVATE_TOKEN = os.environ['GITLAB_READ_TOKEN']
@@ -8,6 +9,7 @@ TOKEN = os.environ['GITLAB_TRIGGER_TOKEN']
 DEFAULT_HOST = 'https://biodata-integration-tests.net'
 DEFAULT_BRANCH = 'master'
 DEFAULT_PROJECT_NUM = 3
+
 
 def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(description='Gitlab Test Trigger')
@@ -21,11 +23,17 @@ def main(argv=sys.argv[1:]):
     pipeline = response.json()['web_url'].split('/')[-1].strip()
     status = 'pending'
 
+    print(f'Starting integration tests.  Status: {status}.  Checking back in 10 seconds.')
     while status in ('pending', 'running'):
         time.sleep(10)
         response = requests.get(f'{o.host}/api/v4/projects/{o.project}/pipelines/{pipeline}',
                                 headers={'PRIVATE-TOKEN': PRIVATE_TOKEN})
-        status = response.json()['status']
+        try:
+            status = response.json()['status']
+            print(f'Status is: {status}.  Checking status again in 10 seconds.')
+        except:
+            print(response.content)
+            exit(0)
 
     if status == 'failed':
         raise RuntimeError('Integration Tests have Failed.')
