@@ -20,10 +20,12 @@ def main(argv=sys.argv[1:]):
 
     response = requests.post(f'{o.host}/api/v4/projects/{o.project}/trigger/pipeline?token={TOKEN}&ref={o.branch}')
     response.raise_for_status()
-    pipeline = response.json()['web_url'].split('/')[-1].strip()
+    test_url = response.json()['web_url']
+    pipeline = test_url.split('/')[-1].strip()
     status = 'pending'
 
-    print(f'Starting integration tests.  Status: {status}.  Checking back in 10 seconds.')
+    print(f'Starting integration tests.  Checking status in 10 seconds.\n'
+          f'See: {test_url}')
     while status in ('pending', 'running'):
         time.sleep(10)
         response = requests.get(f'{o.host}/api/v4/projects/{o.project}/pipelines/{pipeline}',
@@ -36,8 +38,8 @@ def main(argv=sys.argv[1:]):
             exit(0)
 
     if status == 'failed':
-        raise RuntimeError('Integration Tests have Failed.')
-    print(f'Exiting.  Status was: {status}')
+        raise RuntimeError(f'Integration Tests have Failed: {test_url}')
+    print(f'Exiting.  Status was: {status}.  See: {test_url}')
 
 
 if __name__ == '__main__':
