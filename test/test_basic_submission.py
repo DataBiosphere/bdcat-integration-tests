@@ -8,7 +8,6 @@ import json
 
 import google.cloud.storage
 
-# import terra_notebook_utils as terra
 import firecloud.api
 from gen3.submission import Gen3Submission
 from gen3.auth import Gen3Auth
@@ -17,9 +16,9 @@ pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noq
 sys.path.insert(0, pkg_root)  # noqa
 
 from test.utils import retry, fetch_terra_drs_url, md5sum, download, GEN3_ENDPOINTS, GS_SCHEMA
+from test.infra.testmode import controlled_access
 
 logger = logging.getLogger(__name__)
-
 
 
 class TestGen3DataAccess(unittest.TestCase):
@@ -53,9 +52,31 @@ class TestGen3DataAccess(unittest.TestCase):
         google_url_path = google_url_paths[0]
         assert 'HG01131.final.cram.crai' in google_url_path
 
+    @controlled_access
+    def test_drs_in_terra(self):
+        json_response = fetch_terra_drs_url(drs_url="drs://dg.712C/fa640b0e-9779-452f-99a6-16d833d15bd0")
+        google_url_paths = [url['url'] for url in json_response['dos']['data_object']['urls'] if url['url'].startswith(GS_SCHEMA)]
+
+        assert len(google_url_paths) == 1
+        google_url_path = google_url_paths[0]
+        assert 'HG01131.final.cram.crai' in google_url_path
+
+        bucket_name = google_url_path[len(gs_prefix):].split('/')[0]
+
+        bucket = self.google_storage_client.bucket(bucket_name, user_project=os.environ['GOOGLE_PROJECT_ID'])
+        blob_key = google_url_path[len(f'{gs_prefix}{bucket}/'):]
+        blob = bucket.blob(blob_key)
+        download_path = os.path.join(pkg_root, 'test', google_url_path.split('/')[-1])
+
+        expected_md5sums = [checksum for checksum in json_response['dos']['data_object']['checksums'] if checksum['type'] == 'md5']
+        assert len(expected_md5sums) == 1
+        expected_md5sum = expected_md5sums[0]
+
+        assert md5sum(download_path) == expected_md5sum
+        print(f"Terra download finished: {download_path}")
+
     def test_data_introspect(self):
         response = self.gen3_sub_client.get_programs()  # {'links': ['/v0/submission/parent', '/v0/submission/topmed', '/v0/submission/open_access', '/v0/submission/tutorial']}
-
         response = self.gen3_sub_client.query(query_txt='{project(first:0){project_id id}}')
 
         program = 'topmed'
@@ -63,9 +84,7 @@ class TestGen3DataAccess(unittest.TestCase):
         # sample_id = 'c4422337-2b52-4cb0-8180-a069c1c9efb4'
 
         response = self.gen3_sub_client.get_projects(program=program)
-
         response = self.gen3_sub_client.get_project_dictionary(program=program, project=project)
-
         output_path = 'sample_node.tsv'
         response = self.gen3_sub_client.export_node(program=program,
                                                     project=project,

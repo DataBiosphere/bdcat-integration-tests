@@ -139,7 +139,3 @@ def download(drs_url: str, filepath: str):
     blob = client.bucket(bucket_name, user_project=GOOGLE_PROJECT_NAME).blob(key)
     with open(filepath, "wb") as fh:
         blob.download_to_file(fh)
-
-# import subprocess
-# o = subprocess.check_call(['gcloud', 'auth', 'application-default', 'login', '--no-launch-browser'])
-# print(o)
