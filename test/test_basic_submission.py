@@ -7,7 +7,9 @@ import os
 import json
 
 import google.cloud.storage
-import terra_notebook_utils as terra
+
+# import terra_notebook_utils as terra
+import firecloud.api
 from gen3.submission import Gen3Submission
 from gen3.auth import Gen3Auth
 
