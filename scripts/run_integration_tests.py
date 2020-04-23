@@ -2,8 +2,8 @@ import requests
 import time
 import argparse
 
-PRIVATE_TOKEN = os.environ['BDCAT_PRIVATE_TEST_TOKEN']
-TOKEN = os.environ['BDCAT_TEST_TOKEN']
+PRIVATE_TOKEN = os.environ['GITLAB_READ_TOKEN']
+TOKEN = os.environ['GITLAB_TRIGGER_TOKEN']
 DEFAULT_HOST = 'https://biodata-integration-tests.net'
 DEFAULT_BRANCH = 'master'
 DEFAULT_PROJECT_NUM = 3
