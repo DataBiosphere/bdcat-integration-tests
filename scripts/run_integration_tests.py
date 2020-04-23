@@ -1,5 +1,6 @@
 import requests
 import time
+import os
 import argparse
 
 PRIVATE_TOKEN = os.environ['GITLAB_READ_TOKEN']
