@@ -1,4 +1,4 @@
-image: ubuntu
+image: ubuntu:18.04
 # TODO: build image
 
 stages:
