@@ -45,4 +45,3 @@ export GITLAB_TRIGGER_TOKEN=somethingsomething
 
 python scripts/run_integration_tests.py
 ```
-**TODO: Set up this example properly
