@@ -1,17 +1,48 @@
 # Biodata Catalyst Integration Testing
 
-This supports integration testing between components for the biodata catalyst grant.
+Dedicated to integration testing between components for the biodata catalyst grant.
 
-Add the script: `scripts/run_integration_tests.py` with appropriate tokens to your workflow will add these tests to your test suite.
+Intended to alert teams immediately when a component breaks compatibility with another component.
 
----------------------------------
+We welcome feedback and suggestions from any Biodata Catalyst team on useful tests that would help to 
+strengthen the stability of interaction between components.  Please email either lblauvel at ucsc.edu or 
+bhannafi at ucsc.edu.
 
-Server hosted tests here: https://biodata-integration-tests.net/
+### How to Trigger Integration Tests Externally
 
-Initial testing to create end-to-end tests representing the user process of uploading, investigating, running, and analyzing results on the Biodata Catalyst platform.
+You will need two tokens:
 
-A secure, credentialed account will supply data to upload to gen3 using their API, login to and import the data into terra using the results from the gen3 API to feed into the terra API, run a series of workflows, and analyze the results as an initial proof of concept integration test.
+1. A trigger token for the repository.
 
-This should alert teams immediately when a component breaks compatibility with another component.
+1. A personal gitlab API key.
 
-We are looking for feedback from the teams of the different Biodata Catalyst components on what tests would be useful to help strengthen the stability of interaction between components.
+**Note: It's recommended that you create a new github account to act as a test bot to own both tokens rather than using 
+personal accounts.
+
+To create these two tokens, have your github testing account click the github sign-in button (do not register by 
+email) here: https://biodata-integration-tests.net 
+
+It will say that you are blocked.  Email either lblauvel at ucsc.edu or bhannafi at ucsc.edu to be unblocked 
+and added to the integration testing repo.  Please include what team you're with and which external repos will be 
+running the triggered tests.  Once the account is added, mint the two tokens needed:
+
+1. Make a personal access token (GITLAB_READ_TOKEN): https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#creating-a-personal-access-token
+
+1. Make a project trigger token (GITLAB_TRIGGER_TOKEN): https://docs.gitlab.com/ee/ci/triggers/#adding-a-new-trigger
+
+The following is just an example of how to run the repo.  Please use best practice and don't declare env vars in plain 
+text as is done below (i.e. use base64 encoding and fetch from a secret or a secret file; don't allow tokens to be 
+captured by stdout or your history (stdin)):
+
+```
+# download the repo and setup dependencies
+git clone https://github.com/DataBiosphere/bdcat-integration-tests.git && cd bdcat-integration-tests
+virtualenv -p python3.7 venv && . venv/bin/activate && pip install -r requirements.txt
+
+# declare the tokens
+export GITLAB_READ_TOKEN=somethingsomething
+export GITLAB_TRIGGER_TOKEN=somethingsomething
+
+python scripts/run_integration_tests.py
+```
+# TODO: Set up this example properly
