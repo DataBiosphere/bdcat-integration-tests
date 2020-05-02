@@ -1,6 +1,16 @@
 set -a
-GOOGLE_PROJECT_NAME='platform-dev'
-GOOGLE_PROJECT_ID='platform-dev-178517'
-# GEN3KEY='/home/quokka/Downloads/credentials.json'
-# GOOGLE_APPLICATION_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
+# these are only coincidentally the same
+GOOGLE_PROJECT_NAME='aj-saturn-e2e-testing-dev'
+GOOGLE_PROJECT_ID='aj-saturn-e2e-testing-dev'
+
+GEN3KEY=/home/quokka/.credentials/gen3.key
+TEST_MULE_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
+TERRA_DEV_WORKSPACE='test'
+TERRA_STAGING_WORKSPACE='test'
+TERRA_PROD_WORKSPACE='test2'
+# TERRA_STAGING_ACCOUNT='fccredits-bromine-taupe-4796'
+# GOOGLE_TEST_ACCOUNT='aj-saturn-e2e-testing-dev'  # active on (Terra) staging and dev
+GOOGLE_TEST_ACCOUNT='broad-integration-testing'  # only active on (Terra) prod
 set +a
+
+unset GOOGLE_APPLICATION_CREDENTIALS

@@ -8,6 +8,7 @@ import time
 from typing import List, Set
 from requests.exceptions import HTTPError
 
+from firecloud import fiss
 from terra_notebook_utils import gs, GS_SCHEMA
 
 GEN3_ENDPOINTS = {
@@ -101,7 +102,7 @@ def fetch_google_secret(secret):
 def fetch_terra_drs_url(drs_url, martha_stage='dev'):
     headers = {'content-type': 'application/json'}
     if martha_stage != 'dev':
-        headers['authorization'] = f"Bearer {fetch_google_secret(secret='')}"  # TODO: set this
+        headers['authorization'] = f"Bearer ya29."  # TODO: set this
 
     resp = requests.post(MARTHA_ENDPOINTS[martha_stage], headers=headers, data=json.dumps(dict(url=drs_url)))
     if 200 == resp.status_code:
@@ -119,8 +120,8 @@ def _parse_gs_url(gs_url):
         raise RuntimeError(f'Invalid gs url schema.  {gs_url} does not start with {GS_SCHEMA}')
 
 
-def resolve_drs_for_gs_storage(drs_url):
-    drs_info = fetch_terra_drs_url(drs_url)
+def resolve_drs_for_gs_storage(drs_url, martha_stage='dev'):
+    drs_info = fetch_terra_drs_url(drs_url, martha_stage=martha_stage)
     print(drs_info)
     credentials_data = drs_info['googleServiceAccount']['data']
     for url_info in drs_info['dos']['data_object']['urls']:
@@ -134,8 +135,8 @@ def resolve_drs_for_gs_storage(drs_url):
     return client, bucket_name, key
 
 
-def download(drs_url: str, filepath: str):
-    client, bucket_name, key = resolve_drs_for_gs_storage(drs_url)
+def download(drs_url: str, filepath: str, martha_stage: str = 'dev'):
+    client, bucket_name, key = resolve_drs_for_gs_storage(drs_url, martha_stage)
     blob = client.bucket(bucket_name, user_project=GOOGLE_PROJECT_NAME).blob(key)
     with open(filepath, "wb") as fh:
         blob.download_to_file(fh)
