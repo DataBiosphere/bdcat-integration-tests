@@ -33,7 +33,7 @@ class TestGen3DataAccess(unittest.TestCase):
         with open(os.environ['GEN3KEY'], 'r') as f:
             cls.gen3_key = json.loads(f.read())
         if not os.path.exists(gcloud_cred_dir):
-            os.mkdir(gcloud_cred_dir)
+            os.makedirs(gcloud_cred_dir, exist_ok=True)
         try:
             shutil.copy(os.environ['TEST_MULE_CREDENTIALS'],
                         os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
