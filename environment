@@ -4,7 +4,7 @@ GOOGLE_PROJECT_NAME='aj-saturn-e2e-testing-dev'
 GOOGLE_PROJECT_ID='aj-saturn-e2e-testing-dev'
 
 # GEN3KEY=/home/quokka/.credentials/gen3.key
-TEST_MULE_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
+# TEST_MULE_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
 TERRA_DEV_WORKSPACE='test'
 TERRA_STAGING_WORKSPACE='test'
 TERRA_PROD_WORKSPACE='test2'
