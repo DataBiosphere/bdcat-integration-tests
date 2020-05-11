@@ -28,9 +28,12 @@ logger = logging.getLogger(__name__)
 class TestGen3DataAccess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
         cls.gen3_endpoint = GEN3_ENDPOINTS['staging']
         with open(os.environ['GEN3KEY'], 'r') as f:
             cls.gen3_key = json.loads(f.read())
+        if not os.path.exists(gcloud_cred_dir):
+            os.mkdir(gcloud_cred_dir)
         try:
             shutil.copy(os.environ['TEST_MULE_CREDENTIALS'],
                         os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
