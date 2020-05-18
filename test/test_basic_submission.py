@@ -123,6 +123,7 @@ class TestGen3DataAccess(unittest.TestCase):
             )
         )
 
+    @controlled_access
     def test_gen3_drs_to_terra(self):
         # grab a gen3 manifest for our current stage; this will spray error messages left and right
         # but apparently still produces a file
@@ -142,6 +143,7 @@ class TestGen3DataAccess(unittest.TestCase):
         json_response = download(drs_uri, filepath=self.drs_file_path, martha_stage='prod')
         print(json_response)
 
+    @controlled_access
     def test_gen3(self):
         index = Gen3Index(self.gen3_endpoint)
         assert index.is_healthy() is True
@@ -190,6 +192,7 @@ class TestGen3DataAccess(unittest.TestCase):
         #     ]
         # }
 
+    @controlled_access
     def test_upload_gen3_manifest_to_terra(self):
         # gen3's test tsv apparently breaks Terra: b'{\n  "statusCode": 400,\n  "source": "FireCloud",\n  "timestamp": 1588401485851,\n  "causes": [],\n  "stackTrace": [],\n  "message": "Invalid first column header, entity type should end in _id"\n}\n'
         # otherwise both endpoints return successful responses and terra accepts a dummy tsv below
