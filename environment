@@ -5,11 +5,8 @@ GOOGLE_PROJECT_ID='aj-saturn-e2e-testing-dev'
 
 # GEN3KEY=/home/quokka/.credentials/gen3.key
 # TEST_MULE_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
-TERRA_DEV_WORKSPACE='test'
 TERRA_STAGING_WORKSPACE='DRS-Test-Workspace'
-TERRA_PROD_WORKSPACE='test2'
 GOOGLE_TEST_ACCOUNT='drs-billing-project'  # active on (Terra) staging
-# GOOGLE_TEST_ACCOUNT='broad-integration-testing'  # only active on (Terra) prod
 set +a
 
 unset GOOGLE_APPLICATION_CREDENTIALS
