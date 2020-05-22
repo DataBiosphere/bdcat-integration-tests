@@ -104,9 +104,10 @@ def mint_access_token():
                          shell=True,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
-    if stderr:
+    stdout = stdout.decode('utf-8').strip()
+    if not stdout.startswith('ya29.'):
         raise RuntimeError(f'Error minting access token: {stderr}')
-    return stdout.decode('utf-8').strip()
+    return stdout
 
 
 @retry(error_codes={500, 502, 503, 504})
