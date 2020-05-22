@@ -61,7 +61,7 @@ class TestGen3DataAccess(unittest.TestCase):
         submission_id = response['submissionId']
 
         # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
-        timeout = 60 * 60  # 60 minutes
+        timeout = 10 * 60  # 10 minutes
         while status == 'Submitted':
             response = check_workflow_status(submission_id=submission_id)
             time.sleep(10)
