@@ -4,6 +4,7 @@ import requests
 import hashlib
 import functools
 import time
+import subprocess
 
 from typing import List, Set
 from requests.exceptions import HTTPError
@@ -95,14 +96,69 @@ def fetch_google_secret(secret):
 
     client = SecretManagerServiceClient()
     response = client.access_secret_version(f'projects/{GOOGLE_PROJECT_NAME}/secrets/{secret}/versions/latest')
-    return response.payload.data.decode('UTF-8')
+    return response.payload.data.decode('utf-8')
+
+
+def mint_access_token():
+    p = subprocess.Popen('gcloud auth application-default print-access-token',
+                         shell=True,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    if stderr:
+        raise RuntimeError(f'Error minting access token: {stderr}')
+    return stdout.decode('utf-8').strip()
 
 
 @retry(error_codes={500, 502, 503, 504})
-def fetch_terra_drs_url(drs_url, martha_stage='dev'):
+def run_workflow():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'DRS-Test-Workspace'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions'
+
+    token = mint_access_token()
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    data = {
+        "methodConfigurationNamespace": "drs_tests",
+        "methodConfigurationName": "md5sum",
+        "entityType": "data_access_test_drs_uris_set",
+        "entityName": "md5sum_2020-05-19T17-52-42",
+        "expression": "this.data_access_test_drs_uriss",
+        "useCallCache": False,
+        "deleteIntermediateOutputFiles": True,
+        "workflowFailureMode": "NoNewCalls"
+    }
+
+    resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def check_workflow_status(submission_id):
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'DRS-Test-Workspace'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}'
+
+    token = mint_access_token()
+    headers = {'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.get(endpoint, headers=headers)
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def fetch_terra_drs_url(drs_url, martha_stage='staging'):
+    token = mint_access_token()
     headers = {'content-type': 'application/json'}
     if martha_stage != 'dev':
-        headers['authorization'] = f"Bearer ya29."  # TODO: set this
+        headers['authorization'] = f"Bearer {token}"
 
     resp = requests.post(MARTHA_ENDPOINTS[martha_stage], headers=headers, data=json.dumps(dict(url=drs_url)))
     if 200 == resp.status_code:
@@ -110,33 +166,3 @@ def fetch_terra_drs_url(drs_url, martha_stage='dev'):
     else:
         print(resp.content)
         resp.raise_for_status()
-
-
-def _parse_gs_url(gs_url):
-    if gs_url.startswith(GS_SCHEMA):
-        bucket_name, object_key = gs_url[len(GS_SCHEMA):].split("/", 1)
-        return bucket_name, object_key
-    else:
-        raise RuntimeError(f'Invalid gs url schema.  {gs_url} does not start with {GS_SCHEMA}')
-
-
-def resolve_drs_for_gs_storage(drs_url, martha_stage='dev'):
-    drs_info = fetch_terra_drs_url(drs_url, martha_stage=martha_stage)
-    print(drs_info)
-    credentials_data = drs_info['googleServiceAccount']['data']
-    for url_info in drs_info['dos']['data_object']['urls']:
-        if url_info['url'].startswith(GS_SCHEMA):
-            data_url = url_info['url']
-            break
-    else:
-        raise Exception(f"Unable to resolve GS url for {drs_url}")
-    bucket_name, key = _parse_gs_url(data_url)
-    client = gs.get_client(credentials_data, project=credentials_data['project_id'])
-    return client, bucket_name, key
-
-
-def download(drs_url: str, filepath: str, martha_stage: str = 'dev'):
-    client, bucket_name, key = resolve_drs_for_gs_storage(drs_url, martha_stage)
-    blob = client.bucket(bucket_name, user_project=GOOGLE_PROJECT_NAME).blob(key)
-    with open(filepath, "wb") as fh:
-        blob.download_to_file(fh)
