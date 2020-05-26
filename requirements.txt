@@ -3,5 +3,4 @@ google-cloud-storage==1.27.0
 gen3==2.2.3
 firecloud==0.16.26
 requests
-git+https://github.com/DataBiosphere/terra-notebook-utils
-
+terra-notebook-utils==0.0.2
