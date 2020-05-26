@@ -2,5 +2,6 @@ google-cloud-secret-manager==0.2.0
 google-cloud-storage==1.27.0
 gen3==2.2.3
 firecloud==0.16.26
+requests
 git+https://github.com/DataBiosphere/terra-notebook-utils
 
