@@ -139,6 +139,72 @@ def run_workflow():
 
 
 @retry(error_codes={500, 502, 503, 504})
+def import_dockstore_wf_into_terra():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'BDC_Dockstore_Import_Test'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs'
+
+    token = mint_access_token()
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    data = {
+        "namespace": billing_project,
+        "name": "UM_aligner_wdl",
+        "rootEntityType": "",
+        "inputs": {},
+        "outputs": {},
+        "prerequisites": {},
+        "methodRepoMethod":  {
+            "sourceRepo": "dockstore",
+            "methodPath": "github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl",
+            "methodVersion": "1.32.0"
+        },
+        "methodConfigVersion": 1,
+        "deleted": False
+    }
+
+    resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def check_workflow_presence_in_terra_workspace():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'BDC_Dockstore_Import_Test'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs?allRepos=true'
+
+    token = mint_access_token()
+    headers = {'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.get(endpoint, headers=headers)
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def delete_workflow_presence_in_terra_workspace():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'BDC_Dockstore_Import_Test'
+    billing_project = 'drs-billing-project'
+    workflow = 'UM_aligner_wdl'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs/{billing_project}/{workflow}'
+
+    token = mint_access_token()
+    headers = {'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.delete(endpoint, headers=headers)
+    resp.raise_for_status()
+    return {}
+
+
+@retry(error_codes={500, 502, 503, 504})
 def check_workflow_status(submission_id):
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'DRS-Test-Workspace'
