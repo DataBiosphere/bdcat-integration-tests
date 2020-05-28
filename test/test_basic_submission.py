@@ -16,7 +16,7 @@ from gen3.auth import Gen3Auth
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
-from test.utils import GEN3_ENDPOINTS, GS_SCHEMA
+from test.utils import run_workflow, check_workflow_status, GEN3_ENDPOINTS, GS_SCHEMA
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,29 @@ class TestGen3DataAccess(unittest.TestCase):
             os.remove(cls.gen3_manifest_path)
         if cls.drs_file_path and os.path.exists(cls.drs_file_path):
             os.remove(cls.drs_file_path)
+
+    def test_drs_workflow_in_terra(self):
+        """This test runs md5sum in a fixed workspace using a drs url from gen3."""
+        response = run_workflow()
+        status = response['status']
+        assert status == 'Submitted'
+        assert response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://')
+
+        submission_id = response['submissionId']
+
+        # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
+        timeout = 10 * 60  # 10 minutes
+        while status == 'Submitted':
+            response = check_workflow_status(submission_id=submission_id)
+            time.sleep(10)
+            timeout -= 10
+            print(response)
+            status = response['status']
+            if timeout < 0:
+                raise RuntimeError('The md5sum workflow run timed out.  '
+                                   f'Expected 4 minutes, but took longer than {float(timeout) / 60.0} minutes.')
+
+        assert status == "Done"
 
 
 if __name__ == "__main__":

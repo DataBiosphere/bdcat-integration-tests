@@ -4,6 +4,7 @@ import requests
 import hashlib
 import functools
 import time
+import subprocess
 
 from typing import List, Set
 from requests.exceptions import HTTPError
@@ -95,4 +96,74 @@ def fetch_google_secret(secret):
 
     client = SecretManagerServiceClient()
     response = client.access_secret_version(f'projects/{GOOGLE_PROJECT_NAME}/secrets/{secret}/versions/latest')
-    return response.payload.data.decode('UTF-8')
+    return response.payload.data.decode('utf-8')
+
+
+def mint_access_token():
+    p = subprocess.Popen('gcloud auth application-default print-access-token',
+                         shell=True,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    stdout = stdout.decode('utf-8').strip()
+    if not stdout.startswith('ya29.'):
+        raise RuntimeError(f'Error minting access token: {stderr}')
+    return stdout
+
+
+@retry(error_codes={500, 502, 503, 504})
+def run_workflow():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'DRS-Test-Workspace'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions'
+
+    token = mint_access_token()
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    data = {
+        "methodConfigurationNamespace": "drs_tests",
+        "methodConfigurationName": "md5sum",
+        "entityType": "data_access_test_drs_uris_set",
+        "entityName": "md5sum_2020-05-19T17-52-42",
+        "expression": "this.data_access_test_drs_uriss",
+        "useCallCache": False,
+        "deleteIntermediateOutputFiles": True,
+        "workflowFailureMode": "NoNewCalls"
+    }
+
+    resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def check_workflow_status(submission_id):
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'DRS-Test-Workspace'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}'
+
+    token = mint_access_token()
+    headers = {'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.get(endpoint, headers=headers)
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def fetch_terra_drs_url(drs_url, martha_stage='staging'):
+    token = mint_access_token()
+    headers = {'content-type': 'application/json'}
+    if martha_stage != 'dev':
+        headers['authorization'] = f"Bearer {token}"
+
+    resp = requests.post(MARTHA_ENDPOINTS[martha_stage], headers=headers, data=json.dumps(dict(url=drs_url)))
+    if 200 == resp.status_code:
+        return resp.json()
+    else:
+        print(resp.content)
+        resp.raise_for_status()
