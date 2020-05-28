@@ -99,17 +99,6 @@ def fetch_google_secret(secret):
     return response.payload.data.decode('utf-8')
 
 
-def mint_access_token():
-    p = subprocess.Popen('gcloud auth application-default print-access-token',
-                         shell=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    stdout = stdout.decode('utf-8').strip()
-    if not stdout.startswith('ya29.'):
-        raise RuntimeError(f'Error minting access token: {stderr}')
-    return stdout
-
-
 @retry(error_codes={500, 502, 503, 504})
 def run_workflow():
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
@@ -117,7 +106,7 @@ def run_workflow():
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions'
 
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
@@ -139,13 +128,79 @@ def run_workflow():
 
 
 @retry(error_codes={500, 502, 503, 504})
+def import_dockstore_wf_into_terra():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'BDC_Dockstore_Import_Test'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs'
+
+    token = gs.get_access_token()
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    data = {
+        "namespace": billing_project,
+        "name": "UM_aligner_wdl",
+        "rootEntityType": "",
+        "inputs": {},
+        "outputs": {},
+        "prerequisites": {},
+        "methodRepoMethod":  {
+            "sourceRepo": "dockstore",
+            "methodPath": "github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl",
+            "methodVersion": "1.32.0"
+        },
+        "methodConfigVersion": 1,
+        "deleted": False
+    }
+
+    resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def check_workflow_presence_in_terra_workspace():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'BDC_Dockstore_Import_Test'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs?allRepos=true'
+
+    token = gs.get_access_token()
+    headers = {'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.get(endpoint, headers=headers)
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def delete_workflow_presence_in_terra_workspace():
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    workspace = 'BDC_Dockstore_Import_Test'
+    billing_project = 'drs-billing-project'
+    workflow = 'UM_aligner_wdl'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs/{billing_project}/{workflow}'
+
+    token = gs.get_access_token()
+    headers = {'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.delete(endpoint, headers=headers)
+    resp.raise_for_status()
+    return {}
+
+
+@retry(error_codes={500, 502, 503, 504})
 def check_workflow_status(submission_id):
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'DRS-Test-Workspace'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}'
 
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
@@ -156,7 +211,7 @@ def check_workflow_status(submission_id):
 
 @retry(error_codes={500, 502, 503, 504})
 def fetch_terra_drs_url(drs_url, martha_stage='staging'):
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'content-type': 'application/json'}
     if martha_stage != 'dev':
         headers['authorization'] = f"Bearer {token}"

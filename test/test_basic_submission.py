@@ -7,6 +7,7 @@ import os
 import json
 import time
 import shutil
+import requests
 import google.cloud.storage
 
 from firecloud import fiss
@@ -16,7 +17,13 @@ from gen3.auth import Gen3Auth
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
-from test.utils import run_workflow, check_workflow_status, GEN3_ENDPOINTS, GS_SCHEMA
+from test.utils import (run_workflow,
+                        import_dockstore_wf_into_terra,
+                        check_workflow_presence_in_terra_workspace,
+                        delete_workflow_presence_in_terra_workspace,
+                        check_workflow_status,
+                        GEN3_ENDPOINTS,
+                        GS_SCHEMA)
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +58,55 @@ class TestGen3DataAccess(unittest.TestCase):
         if cls.drs_file_path and os.path.exists(cls.drs_file_path):
             os.remove(cls.drs_file_path)
 
+    def test_dockstore_import_in_terra(self):
+        """"""
+        # import the workflow into terra
+        response = import_dockstore_wf_into_terra()
+        method_info = response['methodConfiguration']['methodRepoMethod']
+        self.assertEqual(method_info['sourceRepo'], 'dockstore')
+        self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
+        self.assertEqual(method_info['methodVersion'], '1.32.0')
+
+        # check that a second attempt gives a 409 error
+        try:
+            import_dockstore_wf_into_terra()
+        except requests.exceptions.HTTPError as e:
+            self.assertEqual(e.response.status_code, 409)
+
+        # check status that the workflow is seen in terra
+        wf_seen_in_terra = False
+        response = check_workflow_presence_in_terra_workspace()
+        for wf_response in response:
+            method_info = wf_response['methodRepoMethod']
+            if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
+                    and method_info['sourceRepo'] == 'dockstore' \
+                    and method_info['methodVersion'] == '1.32.0':
+                wf_seen_in_terra = True
+                break
+        self.assertTrue(wf_seen_in_terra)
+
+        # delete the workflow
+        delete_workflow_presence_in_terra_workspace()
+
+        # check status that the workflow is no longer seen in terra
+        wf_seen_in_terra = False
+        response = check_workflow_presence_in_terra_workspace()
+        for wf_response in response:
+            method_info = wf_response['methodRepoMethod']
+            if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
+                    and method_info['sourceRepo'] == 'dockstore' \
+                    and method_info['methodVersion'] == '1.32.0':
+                wf_seen_in_terra = True
+                break
+        self.assertFalse(wf_seen_in_terra)
+
+
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
         status = response['status']
-        assert status == 'Submitted'
-        assert response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://')
+        self.assertEqual(status, 'Submitted')
+        self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
 
         submission_id = response['submissionId']
 
@@ -72,7 +122,7 @@ class TestGen3DataAccess(unittest.TestCase):
                 raise RuntimeError('The md5sum workflow run timed out.  '
                                    f'Expected 4 minutes, but took longer than {float(timeout) / 60.0} minutes.')
 
-        assert status == "Done"
+        self.assertEqual(status, "Done")
 
 
 if __name__ == "__main__":
