@@ -63,15 +63,15 @@ class TestGen3DataAccess(unittest.TestCase):
         # import the workflow into terra
         response = import_dockstore_wf_into_terra()
         method_info = response['methodConfiguration']['methodRepoMethod']
-        assert method_info['sourceRepo'] == 'dockstore'
-        assert method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl'
-        assert method_info['methodVersion'] == '1.32.0'
+        self.assertEqual(method_info['sourceRepo'], 'dockstore')
+        self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
+        self.assertEqual(method_info['methodVersion'], '1.32.0')
 
         # check that a second attempt gives a 409 error
         try:
             import_dockstore_wf_into_terra()
         except requests.exceptions.HTTPError as e:
-            assert e.response.status_code == 409
+            self.assertEqual(e.response.status_code, 409)
 
         # check status that the workflow is seen in terra
         wf_seen_in_terra = False
@@ -83,7 +83,7 @@ class TestGen3DataAccess(unittest.TestCase):
                     and method_info['methodVersion'] == '1.32.0':
                 wf_seen_in_terra = True
                 break
-        assert wf_seen_in_terra
+        self.assertTrue(wf_seen_in_terra)
 
         # delete the workflow
         delete_workflow_presence_in_terra_workspace()
@@ -98,15 +98,15 @@ class TestGen3DataAccess(unittest.TestCase):
                     and method_info['methodVersion'] == '1.32.0':
                 wf_seen_in_terra = True
                 break
-        assert not wf_seen_in_terra
+        self.assertFalse(wf_seen_in_terra)
 
 
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
         status = response['status']
-        assert status == 'Submitted'
-        assert response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://')
+        self.assertEqual(status, 'Submitted')
+        self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
 
         submission_id = response['submissionId']
 
@@ -122,7 +122,7 @@ class TestGen3DataAccess(unittest.TestCase):
                 raise RuntimeError('The md5sum workflow run timed out.  '
                                    f'Expected 4 minutes, but took longer than {float(timeout) / 60.0} minutes.')
 
-        assert status == "Done"
+        self.assertEqual(status, "Done")
 
 
 if __name__ == "__main__":

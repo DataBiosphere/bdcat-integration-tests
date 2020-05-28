@@ -99,17 +99,6 @@ def fetch_google_secret(secret):
     return response.payload.data.decode('utf-8')
 
 
-def mint_access_token():
-    p = subprocess.Popen('gcloud auth application-default print-access-token',
-                         shell=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    stdout = stdout.decode('utf-8').strip()
-    if not stdout.startswith('ya29.'):
-        raise RuntimeError(f'Error minting access token: {stderr}')
-    return stdout
-
-
 @retry(error_codes={500, 502, 503, 504})
 def run_workflow():
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
@@ -117,7 +106,7 @@ def run_workflow():
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions'
 
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
@@ -145,7 +134,7 @@ def import_dockstore_wf_into_terra():
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs'
 
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
@@ -178,7 +167,7 @@ def check_workflow_presence_in_terra_workspace():
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs?allRepos=true'
 
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
@@ -195,7 +184,7 @@ def delete_workflow_presence_in_terra_workspace():
     workflow = 'UM_aligner_wdl'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs/{billing_project}/{workflow}'
 
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
@@ -211,7 +200,7 @@ def check_workflow_status(submission_id):
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}'
 
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
@@ -222,7 +211,7 @@ def check_workflow_status(submission_id):
 
 @retry(error_codes={500, 502, 503, 504})
 def fetch_terra_drs_url(drs_url, martha_stage='staging'):
-    token = mint_access_token()
+    token = gs.get_access_token()
     headers = {'content-type': 'application/json'}
     if martha_stage != 'dev':
         headers['authorization'] = f"Bearer {token}"
