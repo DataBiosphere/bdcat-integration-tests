@@ -2,10 +2,6 @@
 
 Dedicated to integration testing between components for the biodata catalyst grant.
 
-We welcome feedback and suggestions from any Biodata Catalyst team on useful tests that would help to 
-strengthen the stability of interaction between components.  Please email either lblauvel at ucsc.edu or 
-bhannafi at ucsc.edu.
-
 ### How to Trigger Integration Tests Externally
 
 You will need two tokens:
@@ -43,3 +39,11 @@ export GITLAB_TRIGGER_TOKEN=somethingsomething
 
 python scripts/run_integration_tests.py
 ```
+
+# Adding Tests
+Simply submit a PR and flag for review.
+
+# Feedback
+We welcome feedback and suggestions from any Biodata Catalyst team on useful tests that would help to 
+strengthen the stability of interaction between components.  Please email either lblauvel at ucsc.edu or 
+bhannafi at ucsc.edu.
