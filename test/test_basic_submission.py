@@ -11,7 +11,6 @@ import requests
 import warnings
 import google.cloud.storage
 
-from firecloud import fiss
 from gen3.submission import Gen3Submission
 from gen3.auth import Gen3Auth
 

@@ -4,12 +4,10 @@ import requests
 import hashlib
 import functools
 import time
-import subprocess
 
 from typing import List, Set
 from requests.exceptions import HTTPError
 
-from firecloud import fiss
 from terra_notebook_utils import gs, GS_SCHEMA
 
 GEN3_ENDPOINTS = {
