@@ -2,7 +2,6 @@ image: ubuntu:18.04
 
 stages:
   - test
-  - post
 
 before_script:
   - date && date -u
@@ -17,12 +16,6 @@ unit_tests:
     - git clone https://github.com/DataBiosphere/terra-notebook-utils.git  && cd terra-notebook-utils && python setup.py install
     - cd .. && pip install -r requirements.txt
     - test/test_basic_submission.py
-
-post_to_slack:
-  stage: post
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
     - scripts/post_to_slack.py
 
 scheduled_tests:
