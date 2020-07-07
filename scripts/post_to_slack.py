@@ -24,7 +24,7 @@ def main(argv=sys.argv[1:]):
         'Content-type': 'application/json'
     }
     data = {
-        'text': GITLAB_USER_NAME + ' triggered: ' + CI_JOB_URL
+        'text': GITLAB_USER_NAME + ' triggered: <' + CI_JOB_URL + '>'
     }
 
     response = requests.post(slack_notification_url, data=json.dumps(data), headers=headers)
