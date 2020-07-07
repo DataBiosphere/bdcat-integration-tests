@@ -85,7 +85,8 @@ class TestGen3DataAccess(unittest.TestCase):
         # check status that the workflow is seen in terra
         wf_seen_in_terra = False
         response = check_workflow_presence_in_terra_workspace()
-        for wf_response in response:
+        for i, wf_response in enumerate(response):
+            print(f'Workflow response {i}:\n{wf_response}\n\n\n')
             method_info = wf_response['methodRepoMethod']
             if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
                     and method_info['sourceRepo'] == 'dockstore' \
