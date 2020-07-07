@@ -78,7 +78,7 @@ class TestGen3DataAccess(unittest.TestCase):
 
         # check that a second attempt gives a 409 error
         try:
-            import_dockstore_wf_into_terra()
+            import_dockstore_wf_into_terra(workflow=workflow_name)
         except requests.exceptions.HTTPError as e:
             self.assertEqual(e.response.status_code, 409)
 
