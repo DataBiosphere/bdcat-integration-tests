@@ -10,6 +10,7 @@ import shutil
 import requests
 import warnings
 import google.cloud.storage
+from uuid import uuid4
 
 from gen3.submission import Gen3Submission
 from gen3.auth import Gen3Auth
@@ -68,7 +69,8 @@ class TestGen3DataAccess(unittest.TestCase):
     def test_dockstore_import_in_terra(self):
         """"""
         # import the workflow into terra
-        response = import_dockstore_wf_into_terra()
+        workflow_name = 'UM_aligner_wdl_' + str(uuid4()).replace("-", "")
+        response = import_dockstore_wf_into_terra(workflow=workflow_name)
         method_info = response['methodConfiguration']['methodRepoMethod']
         self.assertEqual(method_info['sourceRepo'], 'dockstore')
         self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
@@ -93,7 +95,7 @@ class TestGen3DataAccess(unittest.TestCase):
         self.assertTrue(wf_seen_in_terra)
 
         # delete the workflow
-        delete_workflow_presence_in_terra_workspace()
+        delete_workflow_presence_in_terra_workspace(workflow=workflow_name)
 
         # check status that the workflow is no longer seen in terra
         wf_seen_in_terra = False

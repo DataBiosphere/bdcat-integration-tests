@@ -126,7 +126,7 @@ def run_workflow():
 
 
 @retry(error_codes={500, 502, 503, 504})
-def import_dockstore_wf_into_terra():
+def import_dockstore_wf_into_terra(workflow='UM_aligner_wdl'):
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'BDC_Dockstore_Import_Test'
     billing_project = 'drs-billing-project'
@@ -139,7 +139,7 @@ def import_dockstore_wf_into_terra():
 
     data = {
         "namespace": billing_project,
-        "name": "UM_aligner_wdl",
+        "name": workflow,
         "rootEntityType": "",
         "inputs": {},
         "outputs": {},
@@ -175,11 +175,10 @@ def check_workflow_presence_in_terra_workspace():
 
 
 @retry(error_codes={500, 502, 503, 504})
-def delete_workflow_presence_in_terra_workspace():
+def delete_workflow_presence_in_terra_workspace(workflow='UM_aligner_wdl'):
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'BDC_Dockstore_Import_Test'
     billing_project = 'drs-billing-project'
-    workflow = 'UM_aligner_wdl'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs/{billing_project}/{workflow}'
 
     token = gs.get_access_token()
