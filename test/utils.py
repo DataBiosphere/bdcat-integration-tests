@@ -187,6 +187,7 @@ def delete_workflow_presence_in_terra_workspace(workflow='UM_aligner_wdl'):
 
     resp = requests.delete(endpoint, headers=headers)
     resp.raise_for_status()
+    print(resp.json())
     return {}
 
 
