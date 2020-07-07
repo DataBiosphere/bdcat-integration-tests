@@ -10,4 +10,3 @@ GOOGLE_TEST_ACCOUNT='drs-billing-project'  # active on (Terra) staging
 set +a
 
 unset GOOGLE_APPLICATION_CREDENTIALS
-# curl -X POST -H 'Content-type: application/json' --da '{"text":"Testing the testing notification."}' https://hooks.slack.com/services/
