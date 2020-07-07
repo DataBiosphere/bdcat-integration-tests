@@ -16,7 +16,7 @@ unit_tests:
     - git clone https://github.com/DataBiosphere/terra-notebook-utils.git  && cd terra-notebook-utils && python setup.py install
     - cd .. && pip install -r requirements.txt
     - test/test_basic_submission.py
-    - scripts/post_to_slack.py
+    - python scripts/post_to_slack.py
 
 scheduled_tests:
   only:
