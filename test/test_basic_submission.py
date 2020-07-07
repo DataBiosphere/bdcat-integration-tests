@@ -88,10 +88,14 @@ class TestGen3DataAccess(unittest.TestCase):
         for i, wf_response in enumerate(response):
             print(f'Workflow response {i}:\n{wf_response}\n\n\n')
             method_info = wf_response['methodRepoMethod']
+            print(f'method_info["methodPath"] == "github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl": {method_info["methodPath"] == "github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl"}')
+            print(f'method_info["sourceRepo"] == "dockstore": {method_info["sourceRepo"] == "dockstore"}')
+            print(f'method_info["methodVersion"] == "1.32.0": {method_info["methodVersion"] == "1.32.0"}')
             if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
                     and method_info['sourceRepo'] == 'dockstore' \
                     and method_info['methodVersion'] == '1.32.0':
                 wf_seen_in_terra = True
+                print('break!')
                 break
         self.assertTrue(wf_seen_in_terra)
 
