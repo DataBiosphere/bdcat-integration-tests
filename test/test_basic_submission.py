@@ -41,6 +41,7 @@ class TestGen3DataAccess(unittest.TestCase):
     def setUpClass(cls):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
         cls.gen3_endpoint = GEN3_ENDPOINTS['staging']
+        print(os.path.exists(os.environ['GEN3KEY']))
         with open(os.environ['GEN3KEY'], 'r') as f:
             cls.gen3_key = json.loads(f.read())
         if not os.path.exists(gcloud_cred_dir):
