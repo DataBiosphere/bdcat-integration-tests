@@ -3,8 +3,8 @@ set -a
 GOOGLE_PROJECT_NAME='aj-saturn-e2e-testing-dev'
 GOOGLE_PROJECT_ID='aj-saturn-e2e-testing-dev'
 
-GEN3KEY=/home/quokka/.credentials/gen3.key
-TEST_MULE_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
+# GEN3KEY=/home/quokka/.credentials/gen3.key
+# TEST_MULE_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
 TERRA_STAGING_WORKSPACE='DRS-Test-Workspace'
 GOOGLE_TEST_ACCOUNT='drs-billing-project'  # active on (Terra) staging
 set +a
