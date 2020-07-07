@@ -7,6 +7,7 @@ import sys
 import argparse
 import json
 
+# custom
 SLACK_WEBHOOK = os.environ['SLACK_WEBHOOK']
 
 # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
