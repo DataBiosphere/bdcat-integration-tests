@@ -1,5 +1,5 @@
-google-cloud-secret-manager
-google-cloud-storage
+google-cloud-secret-manager==1.0.0
+google-cloud-storage==1.27.0
 gen3==2.2.3
 requests
-terra-notebook-utils
+terra-notebook-utils==0.0.2
