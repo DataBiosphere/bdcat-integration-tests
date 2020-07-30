@@ -140,6 +140,47 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
             self.assertEqual(status, "Done")
 
+    def test_terra_health(self):
+        firecloud_status = 'https://api.firecloud.org/status'
+        response = requests.get(firecloud_status).json()
+
+        with self.subTest('Basic Terra Health Check'):
+            self.assertTrue(response['ok'] == True)
+
+        with self.subTest('Basic Terra Systems Health Check'):
+            self.assertTrue(response['systems'] == {
+                "Thurloe": {
+                  "ok": True
+                },
+                "Sam": {
+                  "ok": True
+                },
+                "Consent": {
+                  "ok": True
+                },
+                "is_admin_sa_registered": {
+                  "ok": True
+                },
+                "Rawls": {
+                  "ok": True
+                },
+                "Agora": {
+                  "ok": True
+                },
+                "is_trial_billing_sa_registered": {
+                  "ok": True
+                },
+                "GoogleBuckets": {
+                  "ok": True
+                },
+                "LibraryIndex": {
+                  "ok": True
+                },
+                "OntologyIndex": {
+                  "ok": True
+                }
+              })
+
 
 if __name__ == "__main__":
     unittest.main()
