@@ -141,7 +141,7 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertEqual(status, "Done")
 
     def test_terra_health(self):
-        firecloud_status = 'https://api.alpha.firecloud.org/status'
+        firecloud_status = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org/status'
         response = requests.get(firecloud_status).json()
 
         with self.subTest('Basic Terra Health Check'):
