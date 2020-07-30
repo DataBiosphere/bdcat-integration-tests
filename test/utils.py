@@ -208,6 +208,16 @@ def check_workflow_status(submission_id):
 
 
 @retry(error_codes={500, 502, 503, 504})
+def check_terra_health():
+    # note: the same endpoint seems to be at: https://api.alpha.firecloud.org/status
+    endpoint = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org/status'
+
+    resp = requests.get(endpoint)
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
 def fetch_terra_drs_url(drs_url, martha_stage='staging'):
     token = gs.get_access_token()
     headers = {'content-type': 'application/json'}

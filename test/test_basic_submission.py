@@ -18,6 +18,7 @@ pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noq
 sys.path.insert(0, pkg_root)  # noqa
 
 from test.utils import (run_workflow,
+                        check_terra_health,
                         import_dockstore_wf_into_terra,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
@@ -55,6 +56,8 @@ class TestGen3DataAccess(unittest.TestCase):
         cls.output_tsv_path = os.path.join(pkg_root, 'test_gen3_node.tsv')
         cls.gen3_manifest_path = os.path.join(pkg_root, 'test_gen3_manifest.csv')
         cls.drs_file_path = None
+
+        print(f'Terra [Alpha] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -139,47 +142,6 @@ class TestGen3DataAccess(unittest.TestCase):
 
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
             self.assertEqual(status, "Done")
-
-    def test_terra_health(self):
-        firecloud_status = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org/status'
-        response = requests.get(firecloud_status).json()
-
-        with self.subTest('Basic Terra Health Check'):
-            self.assertTrue(response['ok'] == True)
-
-        with self.subTest('Basic Terra Systems Health Check'):
-            self.assertTrue(response['systems'] == {
-                "Thurloe": {
-                  "ok": True
-                },
-                "Sam": {
-                  "ok": True
-                },
-                "Consent": {
-                  "ok": True
-                },
-                "is_admin_sa_registered": {
-                  "ok": True
-                },
-                "Rawls": {
-                  "ok": True
-                },
-                "Agora": {
-                  "ok": True
-                },
-                "is_trial_billing_sa_registered": {
-                  "ok": True
-                },
-                "GoogleBuckets": {
-                  "ok": True
-                },
-                "LibraryIndex": {
-                  "ok": True
-                },
-                "OntologyIndex": {
-                  "ok": True
-                }
-              })
 
 
 if __name__ == "__main__":
