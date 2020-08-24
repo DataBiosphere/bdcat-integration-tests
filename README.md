@@ -1,6 +1,6 @@
 # Biodata Catalyst Integration Testing
 
-Dedicated to integration testing between components for the biodata catalyst grant.
+Dedicated to integration testing between components for the Biodata Catalyst grant.
 
 ### How to Trigger Integration Tests Externally
 
