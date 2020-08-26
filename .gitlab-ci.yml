@@ -13,9 +13,9 @@ unit_tests:
   stage: test
   script:
     - source environment
-    - make lint
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
+    - pip install flake8 && make lint
     - test/test_basic_submission.py
 
 scheduled_tests:
@@ -25,4 +25,5 @@ scheduled_tests:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
+    - pip install flake8 && make lint
     - test/test_basic_submission.py
