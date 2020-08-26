@@ -1,3 +1,4 @@
+# You should not edit this file directly.  Instead, you should edit requirements.txt.in.
 aiohttp==3.6.2
 astroid==2.4.2
 async-timeout==3.0.1
@@ -20,6 +21,7 @@ google-resumable-media==0.7.1
 googleapis-common-protos==1.52.0
 gs-chunked-io==0.4.3
 idna==2.10
+idna-ssl==1.1.0
 indexclient==2.1.0
 isort==5.4.2
 lazy-object-proxy==1.4.3
@@ -41,6 +43,8 @@ requests==2.24.0
 rsa==4.6
 six==1.15.0
 terra-notebook-utils==0.0.2
+typed-ast==1.4.1
+typing-extensions==3.7.4.3
 urllib3==1.25.10
 wrapt==1.12.1
 yarl==1.5.1

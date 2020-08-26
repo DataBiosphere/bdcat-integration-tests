@@ -2,4 +2,4 @@ google-resumable-media==0.7.1
 terra-notebook-utils==0.0.2
 google-cloud-storage==1.27.0
 gen3==2.2.3
-requests
+requests==2.24.0

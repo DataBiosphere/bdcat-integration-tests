@@ -8,7 +8,7 @@ import time
 from typing import List, Set
 from requests.exceptions import HTTPError
 
-from terra_notebook_utils import gs, GS_SCHEMA
+from terra_notebook_utils import gs
 
 GEN3_ENDPOINTS = {
     'staging': 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/',
@@ -144,7 +144,7 @@ def import_dockstore_wf_into_terra():
         "inputs": {},
         "outputs": {},
         "prerequisites": {},
-        "methodRepoMethod":  {
+        "methodRepoMethod": {
             "sourceRepo": "dockstore",
             "methodPath": "github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl",
             "methodVersion": "1.32.0"
