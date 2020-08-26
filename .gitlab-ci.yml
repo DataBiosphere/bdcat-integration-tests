@@ -15,6 +15,7 @@ unit_tests:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - git clone https://github.com/DataBiosphere/terra-notebook-utils.git  && cd terra-notebook-utils && python setup.py install
     - cd .. && pip install -r requirements.txt
+    - pip freeze
     - test/test_basic_submission.py
 
 scheduled_tests:
