@@ -24,8 +24,7 @@ from test.utils import (run_workflow,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
-                        GEN3_ENDPOINTS,
-                        GS_SCHEMA)
+                        GEN3_ENDPOINTS)
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +119,6 @@ class TestGen3DataAccess(unittest.TestCase):
                 break
         with self.subTest('Dockstore Check Workflow Not Seen'):
             self.assertFalse(wf_seen_in_terra)
-
 
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
