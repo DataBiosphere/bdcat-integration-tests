@@ -17,7 +17,9 @@ from gen3.auth import Gen3Auth
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
+from test.infra import retry
 from test.utils import (run_workflow,
+                        retry,
                         check_terra_health,
                         import_dockstore_wf_into_terra,
                         check_workflow_presence_in_terra_workspace,
@@ -67,9 +69,13 @@ class TestGen3DataAccess(unittest.TestCase):
             os.remove(cls.gen3_manifest_path)
         if cls.drs_file_path and os.path.exists(cls.drs_file_path):
             os.remove(cls.drs_file_path)
+        try:
+            delete_workflow_presence_in_terra_workspace()
+        except:
+            pass
 
+    @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
     def test_dockstore_import_in_terra(self):
-        """"""
         # import the workflow into terra
         response = import_dockstore_wf_into_terra()
         method_info = response['methodConfiguration']['methodRepoMethod']
