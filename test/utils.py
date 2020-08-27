@@ -225,7 +225,92 @@ def fetch_terra_drs_url(drs_url, martha_stage='staging'):
         headers['authorization'] = f"Bearer {token}"
 
     resp = requests.post(MARTHA_ENDPOINTS[martha_stage], headers=headers, data=json.dumps(dict(url=drs_url)))
+
     if 200 == resp.status_code:
+        return resp.json()
+    else:
+        print(resp.content)
+        resp.raise_for_status()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def create_terra_workspace(workspace):
+    token = gs.get_access_token()
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    endpoint = f'{domain}/api/workspaces'
+    token = gs.get_access_token()
+
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    data = dict(namespace='drs-billing-project',
+                name=workspace,
+                authorizationDomain=[],
+                attributes={'description': ''},
+                copyFilesWithPrefix='notebooks/')
+
+    resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
+
+    if resp.ok:
+        return resp.json()
+    else:
+        print(resp.content)
+        resp.raise_for_status()
+
+@retry(error_codes={500, 502, 503, 504})
+def delete_terra_workspace(workspace):
+    token = gs.get_access_token()
+    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}'
+    token = gs.get_access_token()
+
+    headers = {'Accept': 'text/plain',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.delete(endpoint, headers=headers)
+
+    if resp.ok:
+        return resp.content
+    else:
+        print(resp.content)
+        resp.raise_for_status()
+
+@retry(error_codes={500, 502, 503, 504})
+def import_pfb(workspace):
+    token = gs.get_access_token()
+    domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB'
+    token = gs.get_access_token()
+
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+    data = dict(url='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
+
+    resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
+
+    if resp.ok:
+        return resp.json()
+    else:
+        print(resp.content)
+        resp.raise_for_status()
+
+def pfb_job_status_in_terra(workspace, job_id):
+    token = gs.get_access_token()
+    domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
+    billing_project = 'drs-billing-project'
+    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB/{job_id}'
+    token = gs.get_access_token()
+
+    headers = {'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    resp = requests.get(endpoint, headers=headers)
+
+    if resp.ok:
         return resp.json()
     else:
         print(resp.content)
