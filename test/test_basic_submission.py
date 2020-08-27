@@ -177,6 +177,5 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(b'will be deleted' in response)
 
 
-
 if __name__ == "__main__":
     unittest.main()
