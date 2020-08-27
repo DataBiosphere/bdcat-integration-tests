@@ -298,6 +298,7 @@ def import_pfb(workspace):
         print(resp.content)
         resp.raise_for_status()
 
+@retry(error_codes={500, 502, 503, 504})
 def pfb_job_status_in_terra(workspace, job_id):
     token = gs.get_access_token()
     domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
