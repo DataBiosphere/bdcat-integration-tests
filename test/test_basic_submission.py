@@ -77,79 +77,79 @@ class TestGen3DataAccess(unittest.TestCase):
         except:
             pass
 
-    # @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
-    # def test_dockstore_import_in_terra(self):
-    #     # import the workflow into terra
-    #     response = import_dockstore_wf_into_terra()
-    #     method_info = response['methodConfiguration']['methodRepoMethod']
-    #     with self.subTest('Dockstore Import Response: sourceRepo'):
-    #         self.assertEqual(method_info['sourceRepo'], 'dockstore')
-    #     with self.subTest('Dockstore Import Response: methodPath'):
-    #         self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
-    #     with self.subTest('Dockstore Import Response: methodVersion'):
-    #         self.assertEqual(method_info['methodVersion'], '1.32.0')
-    #
-    #     # check that a second attempt gives a 409 error
-    #     try:
-    #         import_dockstore_wf_into_terra()
-    #     except requests.exceptions.HTTPError as e:
-    #         with self.subTest('Dockstore Import Response: 409 conflict'):
-    #             self.assertEqual(e.response.status_code, 409)
-    #
-    #     # check status that the workflow is seen in terra
-    #     wf_seen_in_terra = False
-    #     response = check_workflow_presence_in_terra_workspace()
-    #     for wf_response in response:
-    #         method_info = wf_response['methodRepoMethod']
-    #         if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
-    #                 and method_info['sourceRepo'] == 'dockstore' \
-    #                 and method_info['methodVersion'] == '1.32.0':
-    #             wf_seen_in_terra = True
-    #             break
-    #     with self.subTest('Dockstore Check Workflow Seen'):
-    #         self.assertTrue(wf_seen_in_terra)
-    #
-    #     # delete the workflow
-    #     delete_workflow_presence_in_terra_workspace()
-    #
-    #     # check status that the workflow is no longer seen in terra
-    #     wf_seen_in_terra = False
-    #     response = check_workflow_presence_in_terra_workspace()
-    #     for wf_response in response:
-    #         method_info = wf_response['methodRepoMethod']
-    #         if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
-    #                 and method_info['sourceRepo'] == 'dockstore' \
-    #                 and method_info['methodVersion'] == '1.32.0':
-    #             wf_seen_in_terra = True
-    #             break
-    #     with self.subTest('Dockstore Check Workflow Not Seen'):
-    #         self.assertFalse(wf_seen_in_terra)
-    #
-    # def test_drs_workflow_in_terra(self):
-    #     """This test runs md5sum in a fixed workspace using a drs url from gen3."""
-    #     response = run_workflow()
-    #     status = response['status']
-    #     with self.subTest('Dockstore Workflow Run Submitted'):
-    #         self.assertEqual(status, 'Submitted')
-    #     with self.subTest('Dockstore Workflow Run Responds with DRS.'):
-    #         self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
-    #
-    #     submission_id = response['submissionId']
-    #
-    #     # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
-    #     timeout = 10 * 60  # 10 minutes
-    #     while status == 'Submitted':
-    #         response = check_workflow_status(submission_id=submission_id)
-    #         time.sleep(10)
-    #         timeout -= 10
-    #         print(response)
-    #         status = response['status']
-    #         if timeout < 0:
-    #             raise RuntimeError('The md5sum workflow run timed out.  '
-    #                                f'Expected 4 minutes, but took longer than {float(timeout) / 60.0} minutes.')
-    #
-    #     with self.subTest('Dockstore Workflow Run Completed Successfully'):
-    #         self.assertEqual(status, "Done")
+    @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
+    def test_dockstore_import_in_terra(self):
+        # import the workflow into terra
+        response = import_dockstore_wf_into_terra()
+        method_info = response['methodConfiguration']['methodRepoMethod']
+        with self.subTest('Dockstore Import Response: sourceRepo'):
+            self.assertEqual(method_info['sourceRepo'], 'dockstore')
+        with self.subTest('Dockstore Import Response: methodPath'):
+            self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
+        with self.subTest('Dockstore Import Response: methodVersion'):
+            self.assertEqual(method_info['methodVersion'], '1.32.0')
+
+        # check that a second attempt gives a 409 error
+        try:
+            import_dockstore_wf_into_terra()
+        except requests.exceptions.HTTPError as e:
+            with self.subTest('Dockstore Import Response: 409 conflict'):
+                self.assertEqual(e.response.status_code, 409)
+
+        # check status that the workflow is seen in terra
+        wf_seen_in_terra = False
+        response = check_workflow_presence_in_terra_workspace()
+        for wf_response in response:
+            method_info = wf_response['methodRepoMethod']
+            if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
+                    and method_info['sourceRepo'] == 'dockstore' \
+                    and method_info['methodVersion'] == '1.32.0':
+                wf_seen_in_terra = True
+                break
+        with self.subTest('Dockstore Check Workflow Seen'):
+            self.assertTrue(wf_seen_in_terra)
+
+        # delete the workflow
+        delete_workflow_presence_in_terra_workspace()
+
+        # check status that the workflow is no longer seen in terra
+        wf_seen_in_terra = False
+        response = check_workflow_presence_in_terra_workspace()
+        for wf_response in response:
+            method_info = wf_response['methodRepoMethod']
+            if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
+                    and method_info['sourceRepo'] == 'dockstore' \
+                    and method_info['methodVersion'] == '1.32.0':
+                wf_seen_in_terra = True
+                break
+        with self.subTest('Dockstore Check Workflow Not Seen'):
+            self.assertFalse(wf_seen_in_terra)
+
+    def test_drs_workflow_in_terra(self):
+        """This test runs md5sum in a fixed workspace using a drs url from gen3."""
+        response = run_workflow()
+        status = response['status']
+        with self.subTest('Dockstore Workflow Run Submitted'):
+            self.assertEqual(status, 'Submitted')
+        with self.subTest('Dockstore Workflow Run Responds with DRS.'):
+            self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
+
+        submission_id = response['submissionId']
+
+        # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
+        timeout = 10 * 60  # 10 minutes
+        while status == 'Submitted':
+            response = check_workflow_status(submission_id=submission_id)
+            time.sleep(10)
+            timeout -= 10
+            print(response)
+            status = response['status']
+            if timeout < 0:
+                raise RuntimeError('The md5sum workflow run timed out.  '
+                                   f'Expected 4 minutes, but took longer than {float(timeout) / 60.0} minutes.')
+
+        with self.subTest('Dockstore Workflow Run Completed Successfully'):
+            self.assertEqual(status, "Done")
 
     def test_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = str(datetime.datetime.now()).split('.')[0].replace(':', '').replace(' ', '_').replace('-', '_')
