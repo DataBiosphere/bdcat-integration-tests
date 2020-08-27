@@ -2,7 +2,7 @@ include common.mk
 MODULES=scripts test
 
 lint:
-	flake8 --ignore=E501,E722,E402 $(MODULES)
+	flake8 --ignore=E501,E722,E402,F401 $(MODULES)
 
 requirements:
 	echo -n '' >| requirements.txt
