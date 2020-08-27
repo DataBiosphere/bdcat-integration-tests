@@ -62,7 +62,7 @@ class TestGen3DataAccess(unittest.TestCase):
         cls.gen3_manifest_path = os.path.join(pkg_root, 'test_gen3_manifest.csv')
         cls.drs_file_path = None
 
-        # print(f'Terra [Alpha] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
+        print(f'Terra [Alpha] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
     def tearDownClass(cls) -> None:
