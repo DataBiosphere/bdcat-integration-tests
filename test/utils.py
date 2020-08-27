@@ -258,6 +258,7 @@ def create_terra_workspace(workspace):
         print(resp.content)
         resp.raise_for_status()
 
+
 @retry(error_codes={500, 502, 503, 504})
 def delete_terra_workspace(workspace):
     token = gs.get_access_token()
@@ -276,6 +277,7 @@ def delete_terra_workspace(workspace):
     else:
         print(resp.content)
         resp.raise_for_status()
+
 
 @retry(error_codes={500, 502, 503, 504})
 def import_pfb(workspace):
@@ -297,6 +299,7 @@ def import_pfb(workspace):
     else:
         print(resp.content)
         resp.raise_for_status()
+
 
 @retry(error_codes={500, 502, 503, 504})
 def pfb_job_status_in_terra(workspace, job_id):
