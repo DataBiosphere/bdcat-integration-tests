@@ -8,6 +8,7 @@ import json
 import time
 import shutil
 import requests
+import datetime
 import warnings
 import google.cloud.storage
 
@@ -18,6 +19,10 @@ pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noq
 sys.path.insert(0, pkg_root)  # noqa
 
 from test.utils import (run_workflow,
+                        create_terra_workspace,
+                        delete_terra_workspace,
+                        pfb_job_status_in_terra,
+                        import_pfb,
                         retry,
                         check_terra_health,
                         import_dockstore_wf_into_terra,
@@ -145,6 +150,33 @@ class TestGen3DataAccess(unittest.TestCase):
 
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
             self.assertEqual(status, "Done")
+
+    def test_pfb_handoff_from_gen3_to_terra(self):
+        time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
+        workspace_name = f'drs_test_{time_stamp}_delete_me'
+
+        with self.subTest('Create a terra workspace.'):
+            response = create_terra_workspace(workspace=workspace_name)
+            self.assertTrue('workspaceId' in response)
+            self.assertTrue(response['createdBy'] == 'biodata.integration.test.mule@gmail.com')
+
+        with self.subTest('Import static pfb into the terra workspace.'):
+            response = import_pfb(workspace=workspace_name)
+            self.assertTrue('jobId' in response)
+
+        with self.subTest('Check on the import static pfb job status.'):
+            response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
+            # this should take less than 60 seconds
+            while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting']:
+                time.sleep(2)
+                response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
+            self.assertTrue(response['status'] == 'Done')
+
+        with self.subTest('Delete the terra workspace.'):
+            response = delete_terra_workspace(workspace=workspace_name)
+            self.assertTrue(response.status_code == 202)
+            response = delete_terra_workspace(workspace=workspace_name)
+            self.assertTrue(response.status_code == 404)
 
 
 if __name__ == "__main__":
