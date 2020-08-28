@@ -272,11 +272,7 @@ def delete_terra_workspace(workspace):
 
     resp = requests.delete(endpoint, headers=headers)
 
-    if resp.ok:
-        return resp.content
-    else:
-        print(resp.content)
-        resp.raise_for_status()
+    return resp
 
 
 @retry(error_codes={500, 502, 503, 504})

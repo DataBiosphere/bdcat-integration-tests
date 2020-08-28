@@ -152,7 +152,7 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertEqual(status, "Done")
 
     def test_pfb_handoff_from_gen3_to_terra(self):
-        time_stamp = str(datetime.datetime.now()).split('.')[0].replace(':', '').replace(' ', '_').replace('-', '_')
+        time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
         workspace_name = f'drs_test_{time_stamp}_delete_me'
 
         with self.subTest('Create a terra workspace.'):
@@ -166,15 +166,17 @@ class TestGen3DataAccess(unittest.TestCase):
 
         with self.subTest('Check on the import static pfb job status.'):
             response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
-            # this should take 5-10 seconds
-            while response['status'] == 'Translating':
+            # this should take less than 60 seconds
+            while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting']:
                 time.sleep(2)
                 response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
-            self.assertTrue(response['status'] == 'ReadyForUpsert')
+            self.assertTrue(response['status'] == 'Done')
 
         with self.subTest('Delete the terra workspace.'):
             response = delete_terra_workspace(workspace=workspace_name)
-            self.assertTrue(b'will be deleted' in response)
+            self.assertTrue(response.status_code == 202)
+            response = delete_terra_workspace(workspace=workspace_name)
+            self.assertTrue(response.status_code == 404)
 
 
 if __name__ == "__main__":
