@@ -8,7 +8,29 @@ import time
 from typing import List, Set
 from requests.exceptions import HTTPError
 
-from terra_notebook_utils import gs
+
+def get_access_token():
+    """
+    Retrieve the access token using the default GCP account
+    returns the same result as `gcloud auth print-access-token`
+
+    From: https://github.com/DataBiosphere/terra-notebook-utils/blob/master/terra_notebook_utils/gs.py#L28
+    """
+    if os.environ.get("TERRA_NOTEBOOK_GOOGLE_ACCESS_TOKEN"):
+        token = os.environ['TERRA_NOTEBOOK_GOOGLE_ACCESS_TOKEN']
+    elif os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        from oauth2client.service_account import ServiceAccountCredentials
+        scopes = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
+        creds = ServiceAccountCredentials.from_json_keyfile_name(os.environ['GOOGLE_APPLICATION_CREDENTIALS'],
+                                                                 scopes=scopes)
+        token = creds.get_access_token().access_token
+    else:
+        import google.auth.transport.requests
+        creds, projects = google.auth.default()
+        creds.refresh(google.auth.transport.requests.Request())
+        token = creds.token
+    return token
+
 
 GEN3_ENDPOINTS = {
     'staging': 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/',
@@ -104,7 +126,7 @@ def run_workflow():
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions'
 
-    token = gs.get_access_token()
+    token = get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
@@ -132,7 +154,7 @@ def import_dockstore_wf_into_terra():
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs'
 
-    token = gs.get_access_token()
+    token = get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
@@ -165,7 +187,7 @@ def check_workflow_presence_in_terra_workspace():
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs?allRepos=true'
 
-    token = gs.get_access_token()
+    token = get_access_token()
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
@@ -182,7 +204,7 @@ def delete_workflow_presence_in_terra_workspace():
     workflow = 'UM_aligner_wdl'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs/{billing_project}/{workflow}'
 
-    token = gs.get_access_token()
+    token = get_access_token()
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
@@ -198,7 +220,7 @@ def check_workflow_status(submission_id):
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}'
 
-    token = gs.get_access_token()
+    token = get_access_token()
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
@@ -219,7 +241,7 @@ def check_terra_health():
 
 @retry(error_codes={500, 502, 503, 504})
 def fetch_terra_drs_url(drs_url, martha_stage='staging'):
-    token = gs.get_access_token()
+    token = get_access_token()
     headers = {'content-type': 'application/json'}
     if martha_stage != 'dev':
         headers['authorization'] = f"Bearer {token}"
@@ -235,10 +257,10 @@ def fetch_terra_drs_url(drs_url, martha_stage='staging'):
 
 @retry(error_codes={500, 502, 503, 504})
 def create_terra_workspace(workspace):
-    token = gs.get_access_token()
+    token = get_access_token()
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     endpoint = f'{domain}/api/workspaces'
-    token = gs.get_access_token()
+    token = get_access_token()
 
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
@@ -261,11 +283,11 @@ def create_terra_workspace(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def delete_terra_workspace(workspace):
-    token = gs.get_access_token()
+    token = get_access_token()
     domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}'
-    token = gs.get_access_token()
+    token = get_access_token()
 
     headers = {'Accept': 'text/plain',
                'Authorization': f'Bearer {token}'}
@@ -277,11 +299,11 @@ def delete_terra_workspace(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def import_pfb(workspace):
-    token = gs.get_access_token()
+    token = get_access_token()
     domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB'
-    token = gs.get_access_token()
+    token = get_access_token()
 
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
@@ -299,11 +321,11 @@ def import_pfb(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def pfb_job_status_in_terra(workspace, job_id):
-    token = gs.get_access_token()
+    token = get_access_token()
     domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB/{job_id}'
-    token = gs.get_access_token()
+    token = get_access_token()
 
     headers = {'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
