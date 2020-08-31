@@ -8,7 +8,29 @@ import time
 from typing import List, Set
 from requests.exceptions import HTTPError
 
-from terra_notebook_utils import gs
+
+def get_access_token():
+    """
+    Retrieve the access token using the default GCP account
+    returns the same result as `gcloud auth print-access-token`
+
+    From: https://github.com/DataBiosphere/terra-notebook-utils/blob/master/terra_notebook_utils/gs.py#L28
+    """
+    if os.environ.get("TERRA_NOTEBOOK_GOOGLE_ACCESS_TOKEN"):
+        token = os.environ['TERRA_NOTEBOOK_GOOGLE_ACCESS_TOKEN']
+    elif os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        from oauth2client.service_account import ServiceAccountCredentials
+        scopes = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
+        creds = ServiceAccountCredentials.from_json_keyfile_name(os.environ['GOOGLE_APPLICATION_CREDENTIALS'],
+                                                                 scopes=scopes)
+        token = creds.get_access_token().access_token
+    else:
+        import google.auth.transport.requests
+        creds, projects = google.auth.default()
+        creds.refresh(google.auth.transport.requests.Request())
+        token = creds.token
+    return token
+
 
 GEN3_ENDPOINTS = {
     'staging': 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/',
