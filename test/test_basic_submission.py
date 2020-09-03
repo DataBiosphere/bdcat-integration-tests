@@ -137,19 +137,22 @@ class TestGen3DataAccess(unittest.TestCase):
         submission_id = response['submissionId']
 
         # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
-        timeout = 10 * 60  # 10 minutes
-        while status == 'Submitted':
+        timeout = twenty_minutes = 20 * 60
+        while status != 'Done':
             response = check_workflow_status(submission_id=submission_id)
-            time.sleep(10)
-            timeout -= 10
-            print(response)
+            time.sleep(20)
+            timeout -= 20
             status = response['status']
+            print(f"md5sum workflow state is: {response['workflows'][0]['status']}.  Checking again in 20 seconds.")
             if timeout < 0:
+                print(json.dumps(response, indent=4))
                 raise RuntimeError('The md5sum workflow run timed out.  '
-                                   f'Expected 4 minutes, but took longer than {float(timeout) / 60.0} minutes.')
+                                   f'Expected 4 minutes, but took longer than '
+                                   f'{float(twenty_minutes - timeout) / 60.0} minutes.')
 
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
-            self.assertEqual(status, "Done")
+            if response['workflows'][0]['status'] != "Succeeded":
+                raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
 
     def test_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
