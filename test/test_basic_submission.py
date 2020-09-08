@@ -169,7 +169,7 @@ class TestGen3DataAccess(unittest.TestCase):
 
         with self.subTest('Check on the import static pfb job status.'):
             response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
-            # this should take less than 60 seconds
+            # this should take < 60 seconds
             while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting']:
                 time.sleep(2)
                 response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
