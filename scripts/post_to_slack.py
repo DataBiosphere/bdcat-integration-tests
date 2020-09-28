@@ -33,7 +33,7 @@ def main(argv=sys.argv[1:]):
                                    project=args.project,
                                    quiet=args.quiet)
     data = {
-        'text': GITLAB_USER_NAME + ' triggered: <' + CI_JOB_URL + '>\n' +
+        'text': f'{GITLAB_USER_NAME} triggered: <{CI_JOB_URL}>\n'
                 f'Status is: {status}'
     }
 
