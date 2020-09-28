@@ -13,6 +13,24 @@ DEFAULT_BRANCH = 'master'
 DEFAULT_PROJECT_NUM = 3
 
 
+def get_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM):
+    job_status_url = f'{host}/api/v4/projects/{project}/pipelines/{pipeline}'
+    response = requests.get(job_status_url, headers={'PRIVATE-TOKEN': PRIVATE_TOKEN})
+    response.raise_for_status()
+    return response.json()['status']
+
+
+def wait_for_final_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM, quiet=False):
+    status = 'pending'
+    while status in ('pending', 'running'):
+        time.sleep(10)
+        status = get_status(pipeline=pipeline, host=host, project=project)
+        if not quiet:
+            print('Status is: ' + status)
+            print('Checking status again in 10 seconds.')
+    return status
+
+
 def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(description='Gitlab Test Trigger')
     parser.add_argument("--project", type=int, default=DEFAULT_PROJECT_NUM)
@@ -21,28 +39,18 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("--quiet", default=False, help='Suppress printing run messages.')
     args = parser.parse_args(argv)
 
-    job_trigger_url = args.host + '/api/v4/projects/' + str(args.project) + '/trigger/pipeline?token=' + TOKEN + '&ref=' + args.branch
+    job_trigger_url = f'{args.host}/api/v4/projects/{args.project}/trigger/pipeline?token={TOKEN}&ref={args.branch}'
 
     response = requests.post(job_trigger_url)
     response.raise_for_status()
     test_url = response.json()['web_url']
     pipeline = test_url.split('/')[-1].strip()
-    status = 'pending'
 
     if not args.quiet:
         print('Starting integration tests.  Checking status in 10 seconds.\n'
               'See: ' + test_url)
 
-    job_status_url = args.host + '/api/v4/projects/' + str(args.project) + '/pipelines/' + pipeline
-    while status in ('pending', 'running'):
-        time.sleep(10)
-        response = requests.get(job_status_url,
-                                headers={'PRIVATE-TOKEN': PRIVATE_TOKEN})
-        response.raise_for_status()
-        status = response.json()['status']
-        if not args.quiet:
-            print('Status is: ' + status)
-            print('Checking status again in 10 seconds.')
+    status = wait_for_final_status(pipeline=pipeline, host=args.host, project=args.project, quiet=args.quiet)
 
     if status == 'failed':
         raise RuntimeError('Integration Tests have Failed: ' + test_url)
