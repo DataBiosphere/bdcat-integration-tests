@@ -6,7 +6,7 @@ import sys
 import argparse
 import json
 
-from threading import Thread
+from multiprocessing import Process
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
@@ -44,7 +44,7 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("--host", default=DEFAULT_HOST)
     args = parser.parse_args(argv)
 
-    t = Thread(target=post_notification, kwargs=dict(host=args.host, project=args.project))
+    t = Process(name='squib', target=post_notification, kwargs={'host': args.host, 'project': args.project})
     t.daemon = True
     t.start()
 
