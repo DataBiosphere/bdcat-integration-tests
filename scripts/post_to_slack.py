@@ -44,7 +44,7 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("--host", default=DEFAULT_HOST)
     args = parser.parse_args(argv)
 
-    t = Thread(target=post_notification, host=args.host, project=args.project)
+    t = Thread(target=post_notification, kwargs=dict(host=args.host, project=args.project))
     t.daemon = True
     t.start()
 
