@@ -20,6 +20,7 @@ GITLAB_USER_NAME = os.environ['GITLAB_USER_NAME']
 CI_JOB_URL = os.environ['CI_JOB_URL']
 CI_PIPELINE_URL = os.environ['CI_PIPELINE_URL']
 
+
 def post_notification(host, project):
     slack_notification_url = 'https://hooks.slack.com/services/' + SLACK_WEBHOOK
     headers = {
