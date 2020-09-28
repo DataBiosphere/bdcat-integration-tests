@@ -10,7 +10,7 @@ before_script:
   - apt-get -y upgrade
 
 after_script:
-  - python scripts/post_to_slack.py
+  - python3 scripts/post_to_slack.py
 
 unit_tests:
   stage: test

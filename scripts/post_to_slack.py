@@ -33,7 +33,8 @@ def main(argv=sys.argv[1:]):
                                    project=args.project,
                                    quiet=args.quiet)
     data = {
-        'text': f'{GITLAB_USER_NAME} triggered: <{CI_JOB_URL}>\nStatus is: {status}'
+        'text': f'{GITLAB_USER_NAME} triggered: <{CI_JOB_URL}>\n'
+                f'Status is: {status}'
     }
 
     response = requests.post(slack_notification_url, data=json.dumps(data), headers=headers)
