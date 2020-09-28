@@ -6,6 +6,9 @@ import sys
 import argparse
 import json
 
+pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
+sys.path.insert(0, pkg_root)  # noqa
+
 from scripts.run_integration_tests import wait_for_final_status, DEFAULT_BRANCH, DEFAULT_HOST, DEFAULT_PROJECT_NUM
 
 SLACK_WEBHOOK = os.environ['SLACK_WEBHOOK']
