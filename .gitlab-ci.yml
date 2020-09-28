@@ -5,16 +5,17 @@ stages:
 
 before_script:
   - date && date -u
-  - apt-get update && apt-get install -y python3.8 python3.8-dev python3-pip python-pip virtualenv git apt-transport-https ca-certificates gnupg curl
+  - apt-get update && apt-get install -y python3.8 python3.8-dev python3-pip python-pip virtualenv git apt-transport-https ca-certificates gnupg curl software-properties-common
   - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && apt-get update -y && apt-get install google-cloud-sdk -y
+  - apt-get -y upgrade
 
 unit_tests:
   stage: test
   script:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
-    - git clone https://github.com/DataBiosphere/terra-notebook-utils.git  && cd terra-notebook-utils && python setup.py install
-    - cd .. && pip install -r requirements.txt
+    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
+    - pip install flake8==3.8.3 && make lint
     - test/test_basic_submission.py
     - scripts/post_to_slack.py
 
@@ -24,7 +25,7 @@ scheduled_tests:
   script:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
-    - git clone https://github.com/DataBiosphere/terra-notebook-utils.git  && cd terra-notebook-utils && python setup.py install
-    - cd .. && pip install -r requirements.txt
+    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
+    - pip install flake8 && make lint
     - test/test_basic_submission.py
     - scripts/post_to_slack.py

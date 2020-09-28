@@ -8,6 +8,7 @@ import json
 import time
 import shutil
 import requests
+import datetime
 import warnings
 import google.cloud.storage
 
@@ -18,12 +19,17 @@ pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noq
 sys.path.insert(0, pkg_root)  # noqa
 
 from test.utils import (run_workflow,
+                        create_terra_workspace,
+                        delete_terra_workspace,
+                        pfb_job_status_in_terra,
+                        import_pfb,
+                        retry,
+                        check_terra_health,
                         import_dockstore_wf_into_terra,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
-                        GEN3_ENDPOINTS,
-                        GS_SCHEMA)
+                        GEN3_ENDPOINTS)
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +62,8 @@ class TestGen3DataAccess(unittest.TestCase):
         cls.gen3_manifest_path = os.path.join(pkg_root, 'test_gen3_manifest.csv')
         cls.drs_file_path = None
 
+        print(f'Terra [Alpha] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
+
     @classmethod
     def tearDownClass(cls) -> None:
         if os.path.exists(cls.output_tsv_path):
@@ -64,21 +72,29 @@ class TestGen3DataAccess(unittest.TestCase):
             os.remove(cls.gen3_manifest_path)
         if cls.drs_file_path and os.path.exists(cls.drs_file_path):
             os.remove(cls.drs_file_path)
+        try:
+            delete_workflow_presence_in_terra_workspace()
+        except:
+            pass
 
+    @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
     def test_dockstore_import_in_terra(self):
-        """"""
         # import the workflow into terra
         response = import_dockstore_wf_into_terra()
         method_info = response['methodConfiguration']['methodRepoMethod']
-        self.assertEqual(method_info['sourceRepo'], 'dockstore')
-        self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
-        self.assertEqual(method_info['methodVersion'], '1.32.0')
+        with self.subTest('Dockstore Import Response: sourceRepo'):
+            self.assertEqual(method_info['sourceRepo'], 'dockstore')
+        with self.subTest('Dockstore Import Response: methodPath'):
+            self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
+        with self.subTest('Dockstore Import Response: methodVersion'):
+            self.assertEqual(method_info['methodVersion'], '1.32.0')
 
         # check that a second attempt gives a 409 error
         try:
             import_dockstore_wf_into_terra()
         except requests.exceptions.HTTPError as e:
-            self.assertEqual(e.response.status_code, 409)
+            with self.subTest('Dockstore Import Response: 409 conflict'):
+                self.assertEqual(e.response.status_code, 409)
 
         # check status that the workflow is seen in terra
         wf_seen_in_terra = False
@@ -90,7 +106,8 @@ class TestGen3DataAccess(unittest.TestCase):
                     and method_info['methodVersion'] == '1.32.0':
                 wf_seen_in_terra = True
                 break
-        self.assertTrue(wf_seen_in_terra)
+        with self.subTest('Dockstore Check Workflow Seen'):
+            self.assertTrue(wf_seen_in_terra)
 
         # delete the workflow
         delete_workflow_presence_in_terra_workspace()
@@ -105,31 +122,64 @@ class TestGen3DataAccess(unittest.TestCase):
                     and method_info['methodVersion'] == '1.32.0':
                 wf_seen_in_terra = True
                 break
-        self.assertFalse(wf_seen_in_terra)
-
+        with self.subTest('Dockstore Check Workflow Not Seen'):
+            self.assertFalse(wf_seen_in_terra)
 
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
         status = response['status']
-        self.assertEqual(status, 'Submitted')
-        self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
+        with self.subTest('Dockstore Workflow Run Submitted'):
+            self.assertEqual(status, 'Submitted')
+        with self.subTest('Dockstore Workflow Run Responds with DRS.'):
+            self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
 
         submission_id = response['submissionId']
 
         # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
-        timeout = 10 * 60  # 10 minutes
-        while status == 'Submitted':
+        timeout = twenty_minutes = 20 * 60
+        while status != 'Done':
             response = check_workflow_status(submission_id=submission_id)
-            time.sleep(10)
-            timeout -= 10
-            print(response)
+            time.sleep(20)
+            timeout -= 20
             status = response['status']
+            print(f"md5sum workflow state is: {response['workflows'][0]['status']}.  Checking again in 20 seconds.")
             if timeout < 0:
+                print(json.dumps(response, indent=4))
                 raise RuntimeError('The md5sum workflow run timed out.  '
-                                   f'Expected 4 minutes, but took longer than {float(timeout) / 60.0} minutes.')
+                                   f'Expected 4 minutes, but took longer than '
+                                   f'{float(twenty_minutes - timeout) / 60.0} minutes.')
 
-        self.assertEqual(status, "Done")
+        with self.subTest('Dockstore Workflow Run Completed Successfully'):
+            if response['workflows'][0]['status'] != "Succeeded":
+                raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
+
+    def test_pfb_handoff_from_gen3_to_terra(self):
+        time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
+        workspace_name = f'drs_test_{time_stamp}_delete_me'
+
+        with self.subTest('Create a terra workspace.'):
+            response = create_terra_workspace(workspace=workspace_name)
+            self.assertTrue('workspaceId' in response)
+            self.assertTrue(response['createdBy'] == 'biodata.integration.test.mule@gmail.com')
+
+        with self.subTest('Import static pfb into the terra workspace.'):
+            response = import_pfb(workspace=workspace_name)
+            self.assertTrue('jobId' in response)
+
+        with self.subTest('Check on the import static pfb job status.'):
+            response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
+            # this should take < 60 seconds
+            while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting']:
+                time.sleep(2)
+                response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
+            self.assertTrue(response['status'] == 'Done')
+
+        with self.subTest('Delete the terra workspace.'):
+            response = delete_terra_workspace(workspace=workspace_name)
+            self.assertTrue(response.status_code == 202)
+            response = delete_terra_workspace(workspace=workspace_name)
+            self.assertTrue(response.status_code == 404)
 
 
 if __name__ == "__main__":
