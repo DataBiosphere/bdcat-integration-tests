@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+"""
+Posts the status of a test run to a slack channel designated by SLACK_WEBHOOK.
+
+Each repo seems to only be allowed one slack integration (although you can use
+a comma-separated list to designate multiple channels in one slack account so
+long as the hook has permissions for each).
+
+TODO: This solution can be removed if multiple slack notifications are ever supported
+ natively in the gitlab integrations GUI.
+"""
 import requests
 import os
 import sys
@@ -12,6 +22,7 @@ sys.path.insert(0, pkg_root)  # noqa
 
 from scripts.run_integration_tests import wait_for_final_status, DEFAULT_BRANCH, DEFAULT_HOST, DEFAULT_PROJECT_NUM
 
+# set to dockstore's "dockstore-testing" slack channel on Gitlab
 SLACK_WEBHOOK = os.environ['SLACK_WEBHOOK']
 
 # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
