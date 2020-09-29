@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
+#!/usr/bin/env python3
 import requests
 import time
 import os
@@ -26,7 +25,7 @@ def wait_for_final_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_N
         time.sleep(10)
         status = get_status(pipeline=pipeline, host=host, project=project)
         if not quiet:
-            print('Status is: ' + status)
+            print(f'Status is: {status}')
             print('Checking status again in 10 seconds.')
     return status
 
@@ -47,8 +46,8 @@ def main(argv=sys.argv[1:]):
     pipeline = test_url.split('/')[-1].strip()
 
     if not args.quiet:
-        print('Starting integration tests.  Checking status in 10 seconds.\n'
-              'See: ' + test_url)
+        print('Starting integration tests.  Checking status in 10 seconds.')
+        print(f'See: {test_url}')
 
     status = wait_for_final_status(pipeline=pipeline, host=args.host, project=args.project, quiet=args.quiet)
 
@@ -56,8 +55,8 @@ def main(argv=sys.argv[1:]):
         raise RuntimeError('Integration Tests have Failed: ' + test_url)
 
     if not args.quiet:
-        print('Exiting.  Status was: ' + status)
-        print('See: ' + test_url)
+        print(f'Exiting.  Status was: {status}')
+        print(f'See: {test_url}')
 
 
 if __name__ == '__main__':
