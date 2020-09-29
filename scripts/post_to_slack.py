@@ -2,7 +2,7 @@
 """
 Posts the status of a test run to a slack channel designated by SLACK_WEBHOOK.
 
-Each repo seems to only be allowed one slack integration (although you can use
+Each gitlab repo seems to only be allowed one slack integration (although you can use
 a comma-separated list to designate multiple channels in one slack account so
 long as the hook has permissions for each).
 
