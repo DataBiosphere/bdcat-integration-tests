@@ -56,6 +56,8 @@ def main(argv=sys.argv[1:]):
     parser.add_argument("--host", default=DEFAULT_HOST)
     args = parser.parse_args(argv)
 
+    print('Now posting to Slack.')
+
     t = Process(name='post-2-slack', target=post_notification, kwargs={'host': args.host, 'project': args.project})
     t.daemon = True
     t.start()
