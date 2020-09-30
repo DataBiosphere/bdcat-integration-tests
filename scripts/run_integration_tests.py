@@ -19,10 +19,10 @@ def get_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM):
     return response.json()['status']
 
 
-def wait_for_final_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM, quiet=False):
+def wait_for_final_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM, quiet=False, interval=10):
     status = 'pending'
     while status in ('pending', 'running'):
-        time.sleep(10)
+        time.sleep(interval)
         status = get_status(pipeline=pipeline, host=host, project=project)
         if not quiet:
             print(f'Status is: {status}')

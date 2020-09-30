@@ -39,7 +39,8 @@ def post_notification(host, project):
     status = wait_for_final_status(pipeline=CI_PIPELINE_URL.split('/')[-1],
                                    host=host,
                                    project=project,
-                                   quiet=True)
+                                   quiet=True,
+                                   interval=0.2)
     data = {
         'text': f'{GITLAB_USER_NAME} triggered: <{CI_JOB_URL}>\n'
                 f'Status is: {status}'
