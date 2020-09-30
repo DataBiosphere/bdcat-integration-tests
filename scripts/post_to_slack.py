@@ -40,7 +40,7 @@ def post_notification(host, project):
                                    host=host,
                                    project=project,
                                    quiet=True,
-                                   interval=0.5)
+                                   interval=2)
     data = {
         'text': f'{GITLAB_USER_NAME} triggered: <{CI_JOB_URL}>\n'
                 f'Status is: {status}'
