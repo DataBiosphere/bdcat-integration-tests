@@ -20,14 +20,22 @@ def get_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM):
 
 
 def wait_for_final_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM, quiet=False, interval=10):
-    status = 'pending'
-    while status in ('pending', 'running'):
-        time.sleep(interval)
+    timeout = one_hour = 3600
+    total_time = 0
+    while True:
         status = get_status(pipeline=pipeline, host=host, project=project)
+        if status not in ('pending', 'running'):
+            return status
+
+        time.sleep(interval)
+        total_time += interval
+
+        if total_time > timeout:
+            raise RuntimeError(f'Pipeline status timed out after {total_time} seconds stuck in "{status}".')
+
         if not quiet:
             print(f'Status is: {status}')
-            print('Checking status again in 10 seconds.')
-    return status
+            print(f'Checking status again in {interval} seconds.')
 
 
 def main(argv=sys.argv[1:]):
