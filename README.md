@@ -59,7 +59,7 @@ bhannafi at ucsc.edu.
 | PIC-SURE      |                          | TBD?                     |                          |                          | :heavy_multiplication_x: |      |
 | HeLx          | TBD?                     | TBD?                     |                          | TBD?                     |                          | :heavy_multiplication_x: |
 
- - :heavy_check_mark: : Implemented
+ - :heavy_check_mark: : Implemented (probably not comprehensively; additional testing suggestions are very welcome)
  - :heavy_multiplication_x: : Not Applicable
  - TBD : To Be Done
  - Future : Tests will be needed, but the features have not been built yet
