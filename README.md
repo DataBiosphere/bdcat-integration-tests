@@ -52,14 +52,14 @@ bhannafi at ucsc.edu.
 
 | From / To     | Terra                    | Gen3                     | Dockstore                | Seven Bridges            | PIC-SURE                 | HeLx |
 | ------------- |:------------------------:|:------------------------:|:------------------------:|:------------------------:|:------------------------:| ----:|
-| Terra         | :heavy_multiplication_x: | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_multiplication_x: | Future                   |      |
+| Terra         | :heavy_multiplication_x: | :white_check_mark:       | :white_check_mark:       | :heavy_multiplication_x: | Future                   |      |
 | Gen3          | TBD                      | :heavy_multiplication_x: | TBD?                     | TBD?                     |                          |      |
 | Dockstore     |                          |                          | :heavy_multiplication_x: |                          |                          |      |
 | Seven Bridges | :heavy_multiplication_x: | TBD?                     | TBD?                     | :heavy_multiplication_x: | Future                   |      |
 | PIC-SURE      |                          | TBD?                     |                          |                          | :heavy_multiplication_x: |      |
 | HeLx          | TBD?                     | TBD?                     |                          | TBD?                     |                          | :heavy_multiplication_x: |
 
- - :heavy_check_mark: : Implemented (probably not comprehensively; additional testing suggestions are very welcome)
+ - :white_check_mark: : Implemented (probably not comprehensively; additional testing suggestions are very welcome)
  - :heavy_multiplication_x: : Not Applicable
  - TBD : To Be Done
  - Future : Tests will be needed, but the features have not been built yet
