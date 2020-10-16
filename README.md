@@ -81,3 +81,17 @@ API Test 2:
 API Test 3:
  - Run DRS URI in md5sum workflow in Terra
  - Check workflow run success
+ 
+ Currently tested endpoints are:
+
+ - https://us-central1-broad-dsde-alpha.cloudfunctions.net/martha_v2
+ - https://firecloud-orchestration.dsde-alpha.broadinstitute.org/status
+ - https://firecloud-orchestration.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/importPFB
+ - https://firecloud-orchestration.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/importPFB/{job_id}
+ - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/submissions
+ - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/methodconfigs
+ - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/methodconfigs?allRepos=true
+ - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/methodconfigs/{billing_project}/{workflow}
+ - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}
+ - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces
+ - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}
