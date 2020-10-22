@@ -84,7 +84,6 @@ API Test 3:
  
  Currently tested endpoints are:
 
- - https://us-central1-broad-dsde-alpha.cloudfunctions.net/martha_v2
  - https://firecloud-orchestration.dsde-alpha.broadinstitute.org/status
  - https://firecloud-orchestration.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/importPFB
  - https://firecloud-orchestration.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/importPFB/{job_id}

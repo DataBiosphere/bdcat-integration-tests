@@ -37,12 +37,6 @@ GEN3_ENDPOINTS = {
     'prod': 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'
 }
 
-MARTHA_ENDPOINTS = {
-    'dev': 'https://us-central1-broad-dsde-dev.cloudfunctions.net/martha_v2',
-    'staging': 'https://us-central1-broad-dsde-alpha.cloudfunctions.net/martha_v2',
-    'prod': 'https://us-central1-broad-dsde-prod.cloudfunctions.net/martha_v2'
-}
-
 try:
     GOOGLE_PROJECT_NAME = os.environ["GOOGLE_PROJECT_NAME"]
 except KeyError:
@@ -237,22 +231,6 @@ def check_terra_health():
     resp = requests.get(endpoint)
     resp.raise_for_status()
     return resp.json()
-
-
-@retry(error_codes={500, 502, 503, 504})
-def fetch_terra_drs_url(drs_url, martha_stage='staging'):
-    token = get_access_token()
-    headers = {'content-type': 'application/json'}
-    if martha_stage != 'dev':
-        headers['authorization'] = f"Bearer {token}"
-
-    resp = requests.post(MARTHA_ENDPOINTS[martha_stage], headers=headers, data=json.dumps(dict(url=drs_url)))
-
-    if 200 == resp.status_code:
-        return resp.json()
-    else:
-        print(resp.content)
-        resp.raise_for_status()
 
 
 @retry(error_codes={500, 502, 503, 504})
