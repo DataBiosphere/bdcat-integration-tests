@@ -1,4 +1,5 @@
-FROM python:3
+FROM python:3.8-slim
+#FROM python:3
 COPY . /bdcat-integration-tests
 RUN pip install virtualenv
 CMD ["virtualenv", "-p", "python3.8", "venv"]
@@ -8,8 +9,8 @@ CMD [".", "venv/bin/activate"]
 
 # nope RUN pip install --no-binary pandas pandas
 
-RUN pip install Cython
-RUN pip install numpy
+#RUN pip install Cython
+#RUN pip install numpy
 
-RUN pip install -r bdcat-integration-tests/requirements.txt --no-use-pep517
+RUN pip install -r bdcat-integration-tests/requirements.txt
 CMD ["python", "/bdcat-integration-tests/scripts/run_integration_tests.py"]
