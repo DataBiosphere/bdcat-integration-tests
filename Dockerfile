@@ -6,7 +6,7 @@ CMD [".", "venv/bin/activate"]
 
 #try here
 
+RUN pip install --no-binary pandas pandas
 
-
-RUN pip install -r bdcat-integration-tests/requirements.txt --no-use-pep517
+RUN pip install -r bdcat-integration-tests/requirements.txt
 CMD ["python", "/bdcat-integration-tests/scripts/run_integration_tests.py"]
