@@ -3,5 +3,10 @@ COPY . /bdcat-integration-tests
 RUN pip install virtualenv
 CMD ["virtualenv", "-p", "python3.8", "venv"]
 CMD [".", "venv/bin/activate"]
-RUN pip install -r bdcat-integration-tests/requirements.txt
+
+#try here
+
+
+
+RUN pip install -r bdcat-integration-tests/requirements.txt --no-use-pep517
 CMD ["python", "/bdcat-integration-tests/scripts/run_integration_tests.py"]
