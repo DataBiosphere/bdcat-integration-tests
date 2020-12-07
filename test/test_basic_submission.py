@@ -31,6 +31,8 @@ from test.utils import (run_workflow,
                         check_workflow_status,
                         GEN3_ENDPOINTS)
 
+from terra_notebook_utils import drs
+
 logger = logging.getLogger(__name__)
 
 
@@ -180,6 +182,9 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(response.status_code == 202)
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
+
+    def test_drs_access(self):
+        drs.head('drs://dg.712C/b7a10338-6fb6-4201-adde-0ee933e069bc')
 
 
 if __name__ == "__main__":
