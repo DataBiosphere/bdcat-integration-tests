@@ -275,7 +275,6 @@ def import_pfb(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def pfb_job_status_in_terra(workspace, job_id):
-    token = gs.get_access_token()
     domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB/{job_id}'
