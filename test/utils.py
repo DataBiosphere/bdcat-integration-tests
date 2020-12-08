@@ -337,7 +337,6 @@ def import_drs_from_gen3(drs: str) -> requests.Response:
         else:
             print(f'Gen3 url call succeeded for: {gen3_endpoint} with: {gen3_resp.json()} ...\n'
                   f'BUT the subsequent google called failed: {gs_endpoint_w_requester_pays} with: {gs_resp.content}')
-            print(gs_resp.content)
             gs_resp.raise_for_status()
     else:
         print(f'Gen3 url call failed for: {gen3_endpoint} with: {gen3_resp.content}')
