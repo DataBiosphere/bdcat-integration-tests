@@ -184,9 +184,6 @@ class TestGen3DataAccess(unittest.TestCase):
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
 
-    def test_drs_access(self):
-        drs.head('drs://dg.712C/b7a10338-6fb6-4201-adde-0ee933e069bc')
-
     def test_import_drs_from_gen3(self):
         # weird stuff below; file is 5b, so there may be problems with small files
         # <p class="body">Error Message:</p>\n          <p class="introduction">Not enough segments</p>\n          \n          <div>\n            \n            <p class="body">Please try again!</p>
