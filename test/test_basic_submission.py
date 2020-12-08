@@ -9,7 +9,6 @@ import time
 import shutil
 import requests
 import datetime
-import warnings
 import google.cloud.storage
 
 from gen3.submission import Gen3Submission
@@ -29,6 +28,7 @@ from test.utils import (run_workflow,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
+                        import_drs_from_gen3,
                         GEN3_ENDPOINTS)
 
 from terra_notebook_utils import drs
@@ -37,13 +37,6 @@ logger = logging.getLogger(__name__)
 
 
 class TestGen3DataAccess(unittest.TestCase):
-    def setUp(self):
-        # Stolen shamelessly: https://github.com/DataBiosphere/terra-notebook-utils/pull/59
-        # Suppress the annoying google gcloud _CLOUD_SDK_CREDENTIALS_WARNING warnings
-        warnings.filterwarnings("ignore", "Your application has authenticated using end user credentials")
-        # Suppress unclosed socket warnings
-        warnings.simplefilter("ignore", ResourceWarning)
-
     @classmethod
     def setUpClass(cls):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
@@ -185,6 +178,13 @@ class TestGen3DataAccess(unittest.TestCase):
 
     def test_drs_access(self):
         drs.head('drs://dg.712C/b7a10338-6fb6-4201-adde-0ee933e069bc')
+
+    def test_import_drs_from_gen3(self):
+        # weird stuff below; file is 5b, so there may be problems with small files
+        # <p class="body">Error Message:</p>\n          <p class="introduction">Not enough segments</p>\n          \n          <div>\n            \n            <p class="body">Please try again!</p>
+        # import_drs_from_gen3('drs://dg.712C/b7a10338-6fb6-4201-adde-0ee933e069bc')
+
+        import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7')
 
 
 if __name__ == "__main__":

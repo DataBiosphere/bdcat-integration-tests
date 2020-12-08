@@ -290,3 +290,55 @@ def pfb_job_status_in_terra(workspace, job_id):
     else:
         print(resp.content)
         resp.raise_for_status()
+
+
+def add_requester_pays_arg_to_url(url, billing_project='drs-billing-project'):
+    endpoint, args = url.split('?', 1)
+    return f'{endpoint}?userProject={billing_project}&{args}'
+
+
+@retry(error_codes={500, 502, 503, 504})
+def import_drs_from_gen3(drs: str) -> requests.Response:
+    """
+    Import the first byte of a DRS URI using gen3.
+
+    Makes two calls, first one to gen3, which returns the link needed to make the second
+    call to the google API and fetch directly from the google bucket.
+    """
+    if drs.startswith('drs://'):
+        drs = drs[len('drs://'):]
+    else:
+        raise ValueError(f'DRS URI is missing the "drs://" schema.  Please specify a DRS URI, not: {drs}')
+    gen3_endpoint = f'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{drs}'
+    token = gs.get_access_token()
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+    gen3_resp = requests.get(gen3_endpoint, headers=headers)
+
+    if gen3_resp.ok:
+
+        # Example of the url that gen3 returns:
+        #   google_uri = 'https://storage.googleapis.com/fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.gVCF.2019-02-06/Sample_HG03611/analysis/HG03611.haplotypeCalls.er.raw.g.vcf.gz'
+        #   access_id_arg = 'GoogleAccessId=cirrus@stagingdatastage.iam.gserviceaccount.com'
+        #   expires_arg = 'Expires=1607381713'
+        #   signature_arg = 'Signature=hugehashofmanycharsincluding%=='
+        #   endpoint_looks_like = f'{google_uri}?{access_id_arg}&{expires_arg}&{signature_arg}'
+        gs_endpoint = gen3_resp.json()["url"]
+        gs_endpoint_w_requester_pays = add_requester_pays_arg_to_url(gs_endpoint)
+
+        # Use 'Range' header to only download the first two bytes
+        # https://cloud.google.com/storage/docs/json_api/v1/parameters#range
+        headers['Range'] = 'bytes=0-1'
+
+        gs_resp = requests.get(gs_endpoint_w_requester_pays, headers=headers)
+        if gs_resp.ok:
+            return gs_resp
+        else:
+            print(f'Gen3 url call succeeded for: {gen3_endpoint} with: {gen3_resp.json()} ...\n'
+                  f'BUT the subsequent google called failed: {gs_endpoint_w_requester_pays} with: {gs_resp.content}')
+            print(gs_resp.content)
+            gs_resp.raise_for_status()
+    else:
+        print(f'Gen3 url call failed for: {gen3_endpoint} with: {gen3_resp.content}')
+        gen3_resp.raise_for_status()
