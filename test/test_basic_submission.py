@@ -9,6 +9,7 @@ import time
 import shutil
 import requests
 import datetime
+import warnings
 import google.cloud.storage
 
 from gen3.submission import Gen3Submission
@@ -37,6 +38,13 @@ logger = logging.getLogger(__name__)
 
 
 class TestGen3DataAccess(unittest.TestCase):
+    def setUp(self):
+        # Stolen shamelessly: https://github.com/DataBiosphere/terra-notebook-utils/pull/59
+        # Suppress the annoying google gcloud _CLOUD_SDK_CREDENTIALS_WARNING warnings
+        warnings.filterwarnings("ignore", "Your application has authenticated using end user credentials")
+        # Suppress unclosed socket warnings
+        warnings.simplefilter("ignore", ResourceWarning)
+
     @classmethod
     def setUpClass(cls):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
