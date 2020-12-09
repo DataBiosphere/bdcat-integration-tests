@@ -173,7 +173,9 @@ class TestGen3DataAccess(unittest.TestCase):
             while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting']:
                 time.sleep(2)
                 response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
-            self.assertTrue(response['status'] == 'Done')
+            self.assertTrue(response['status'] == 'Done',
+                            msg=f'Expecting status: "Done" but got "{response["status"]}".\n'
+                                f'Full response: {json.dumps(response, indent=4)}')
 
         with self.subTest('Delete the terra workspace.'):
             response = delete_terra_workspace(workspace=workspace_name)
