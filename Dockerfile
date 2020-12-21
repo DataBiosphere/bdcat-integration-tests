@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.8
 COPY . /bdcat-integration-tests
 RUN pip install virtualenv
 CMD ["virtualenv", "-p", "python3.8", "venv"]
