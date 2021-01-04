@@ -29,7 +29,10 @@ from test.utils import (run_workflow,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
+                        import_drs_from_gen3,
                         GEN3_ENDPOINTS)
+
+from terra_notebook_utils import drs
 
 logger = logging.getLogger(__name__)
 
@@ -182,6 +185,15 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(response.status_code == 202)
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
+
+    def test_import_drs_from_gen3(self):
+        # file is ~1gb, so only download the first byte to check for access
+        import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7')
+
+        # TODO: Investigate the following:
+        # the following file is 5b, but we get a "Not enough segments" Error, so there may be problems with small files:
+        # <p class="body">Error Message:</p>\n          <p class="introduction">Not enough segments</p>\n          \n          <div>\n            \n            <p class="body">Please try again!</p>
+        # import_drs_from_gen3('drs://dg.712C/b7a10338-6fb6-4201-adde-0ee933e069bc')
 
 
 if __name__ == "__main__":
