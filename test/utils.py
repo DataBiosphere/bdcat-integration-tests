@@ -298,18 +298,18 @@ def add_requester_pays_arg_to_url(url, billing_project='drs-billing-project'):
 
 
 @retry(error_codes={500, 502, 503, 504})
-def import_drs_from_gen3(drs: str) -> requests.Response:
+def import_drs_from_gen3(guid: str) -> requests.Response:
     """
     Import the first byte of a DRS URI using gen3.
 
     Makes two calls, first one to gen3, which returns the link needed to make the second
     call to the google API and fetch directly from the google bucket.
     """
-    if drs.startswith('drs://'):
-        drs = drs[len('drs://'):]
+    if guid.startswith('drs://'):
+        guid = guid[len('drs://'):]
     else:
-        raise ValueError(f'DRS URI is missing the "drs://" schema.  Please specify a DRS URI, not: {drs}')
-    gen3_endpoint = f'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{drs}'
+        raise ValueError(f'DRS URI is missing the "drs://" schema.  Please specify a DRS URI, not: {guid}')
+    gen3_endpoint = f'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{guid}'
     token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
