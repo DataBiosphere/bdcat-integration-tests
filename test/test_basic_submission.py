@@ -140,7 +140,8 @@ class TestGen3DataAccess(unittest.TestCase):
         submission_id = response['submissionId']
 
         # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
-        timeout = twenty_minutes = 20 * 60
+        # also configurable manually via MD5SUM_TEST_TIMEOUT if held in a pending state
+        timeout = twenty_minutes = int(os.environ.get('MD5SUM_TEST_TIMEOUT', None)) or 20 * 60
         while status != 'Done':
             response = check_workflow_status(submission_id=submission_id)
             time.sleep(20)
