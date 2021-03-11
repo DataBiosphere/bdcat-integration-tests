@@ -30,7 +30,7 @@ from test.utils import (run_workflow,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
                         import_drs_from_gen3,
-                        GEN3_ENDPOINTS)
+                        GEN3_CONFIG)
 
 from terra_notebook_utils import drs
 
@@ -48,7 +48,7 @@ class TestGen3DataAccess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
-        cls.gen3_endpoint = GEN3_ENDPOINTS['staging']
+        cls.gen3_endpoint = GEN3_CONFIG['staging']
         with open(os.environ['GEN3KEY'], 'r') as f:
             cls.gen3_key = json.loads(f.read())
         if not os.path.exists(gcloud_cred_dir):
