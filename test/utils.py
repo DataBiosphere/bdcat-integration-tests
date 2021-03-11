@@ -11,15 +11,23 @@ from requests.exceptions import HTTPError
 from terra_notebook_utils import gs
 
 
-GEN3_ENDPOINTS = {
+GEN3_CONFIG = {
     'staging': 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/',
     'prod': 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'
 }
 
-try:
-    GOOGLE_PROJECT_NAME = os.environ["GOOGLE_PROJECT_NAME"]
-except KeyError:
-    raise RuntimeError('GOOGLE_PROJECT_NAME is unset.  Please set GOOGLE_PROJECT_ID.')
+STAGE = os.environ.get('BDCAT_STAGE', 'staging')
+
+if STAGE == 'prod':
+    RAWLS_DOMAIN = 'https://rawls.dsde-prod.broadinstitute.org'
+    ORC_DOMAIN = 'https://firecloud-orchestration.dsde-prod.broadinstitute.org'
+    BILLING_PROJECT = 'broad-integration-testing'
+elif STAGE == 'staging':
+    RAWLS_DOMAIN = 'https://rawls.dsde-alpha.broadinstitute.org'
+    ORC_DOMAIN = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
+    BILLING_PROJECT = 'drs-billing-project'
+else:
+    raise ValueError('Please set BDCAT_STAGE to "prod" or "staging".')
 
 
 def retry(intervals: List = [1, 1, 2, 4, 8],
@@ -84,20 +92,10 @@ def md5sum(file_name):
     return hash.hexdigest()
 
 
-def fetch_google_secret(secret):
-    from google.cloud.secretmanager import SecretManagerServiceClient
-
-    client = SecretManagerServiceClient()
-    response = client.access_secret_version(f'projects/{GOOGLE_PROJECT_NAME}/secrets/{secret}/versions/latest')
-    return response.payload.data.decode('utf-8')
-
-
 @retry(error_codes={500, 502, 503, 504})
 def run_workflow():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'DRS-Test-Workspace'
-    billing_project = 'drs-billing-project'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions'
+    endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/submissions'
 
     token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
@@ -122,10 +120,8 @@ def run_workflow():
 
 @retry(error_codes={500, 502, 503, 504})
 def import_dockstore_wf_into_terra():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'BDC_Dockstore_Import_Test'
-    billing_project = 'drs-billing-project'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs'
+    endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/methodconfigs'
 
     token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
@@ -133,7 +129,7 @@ def import_dockstore_wf_into_terra():
                'Authorization': f'Bearer {token}'}
 
     data = {
-        "namespace": billing_project,
+        "namespace": BILLING_PROJECT,
         "name": "UM_aligner_wdl",
         "rootEntityType": "",
         "inputs": {},
@@ -155,10 +151,8 @@ def import_dockstore_wf_into_terra():
 
 @retry(error_codes={500, 502, 503, 504})
 def check_workflow_presence_in_terra_workspace():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'BDC_Dockstore_Import_Test'
-    billing_project = 'drs-billing-project'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs?allRepos=true'
+    endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/methodconfigs?allRepos=true'
 
     token = gs.get_access_token()
     headers = {'Accept': 'application/json',
@@ -171,11 +165,9 @@ def check_workflow_presence_in_terra_workspace():
 
 @retry(error_codes={500, 502, 503, 504})
 def delete_workflow_presence_in_terra_workspace():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'BDC_Dockstore_Import_Test'
-    billing_project = 'drs-billing-project'
     workflow = 'UM_aligner_wdl'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs/{billing_project}/{workflow}'
+    endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/methodconfigs/{BILLING_PROJECT}/{workflow}'
 
     token = gs.get_access_token()
     headers = {'Accept': 'application/json',
@@ -188,10 +180,8 @@ def delete_workflow_presence_in_terra_workspace():
 
 @retry(error_codes={500, 502, 503, 504})
 def check_workflow_status(submission_id):
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
     workspace = 'DRS-Test-Workspace'
-    billing_project = 'drs-billing-project'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}'
+    endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/submissions/{submission_id}'
 
     token = gs.get_access_token()
     headers = {'Accept': 'application/json',
@@ -205,7 +195,7 @@ def check_workflow_status(submission_id):
 @retry(error_codes={500, 502, 503, 504})
 def check_terra_health():
     # note: the same endpoint seems to be at: https://api.alpha.firecloud.org/status
-    endpoint = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org/status'
+    endpoint = f'{ORC_DOMAIN}/status'
 
     resp = requests.get(endpoint)
     resp.raise_for_status()
@@ -214,15 +204,14 @@ def check_terra_health():
 
 @retry(error_codes={500, 502, 503, 504})
 def create_terra_workspace(workspace):
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
-    endpoint = f'{domain}/api/workspaces'
+    endpoint = f'{RAWLS_DOMAIN}/api/workspaces'
 
     token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
-    data = dict(namespace='drs-billing-project',
+    data = dict(namespace=BILLING_PROJECT,
                 name=workspace,
                 authorizationDomain=[],
                 attributes={'description': ''},
@@ -239,9 +228,7 @@ def create_terra_workspace(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def delete_terra_workspace(workspace):
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
-    billing_project = 'drs-billing-project'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}'
+    endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}'
 
     token = gs.get_access_token()
     headers = {'Accept': 'text/plain',
@@ -254,9 +241,7 @@ def delete_terra_workspace(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def import_pfb(workspace):
-    domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
-    billing_project = 'drs-billing-project'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB'
+    endpoint = f'{ORC_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/importPFB'
 
     token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
@@ -275,9 +260,7 @@ def import_pfb(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def pfb_job_status_in_terra(workspace, job_id):
-    domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
-    billing_project = 'drs-billing-project'
-    endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB/{job_id}'
+    endpoint = f'{ORC_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/importPFB/{job_id}'
     token = gs.get_access_token()
 
     headers = {'Accept': 'application/json',
@@ -292,9 +275,9 @@ def pfb_job_status_in_terra(workspace, job_id):
         resp.raise_for_status()
 
 
-def add_requester_pays_arg_to_url(url, billing_project='drs-billing-project'):
+def add_requester_pays_arg_to_url(url):
     endpoint, args = url.split('?', 1)
-    return f'{endpoint}?userProject={billing_project}&{args}'
+    return f'{endpoint}?userProject={BILLING_PROJECT}&{args}'
 
 
 @retry(error_codes={500, 502, 503, 504})
