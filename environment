@@ -5,7 +5,7 @@ SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 export BDCAT_HOME="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
-BDCAT_STAGE=staging
+BDCAT_STAGE=prod
 
 # these are only coincidentally the same
 GOOGLE_PROJECT_NAME='aj-saturn-e2e-testing-dev'
