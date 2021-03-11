@@ -17,15 +17,13 @@ GEN3_ENDPOINTS = {
 }
 
 TERRA_ENDPOINTS = {
-    {
-        'rawls': {
-            'prod': 'https://rawls.broadinstitute.org',
-            'staging': 'https://rawls.dsde-alpha.broadinstitute.org'
-        },
-        'orc': {
-            'prod': 'https://firecloud-orchestration.broadinstitute.org',
-            'staging': 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
-        }
+    'rawls': {
+        'prod': 'https://rawls.broadinstitute.org',
+        'staging': 'https://rawls.dsde-alpha.broadinstitute.org'
+    },
+    'orc': {
+        'prod': 'https://firecloud-orchestration.broadinstitute.org',
+        'staging': 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
     }
 }
 
