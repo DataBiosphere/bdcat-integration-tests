@@ -16,21 +16,6 @@ GEN3_CONFIG = {
     'prod': 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'
 }
 
-TERRA_CONFIG = {
-    'rawls': {
-        'prod': 'https://rawls.dsde-prod.broadinstitute.org',
-        'staging': 'https://rawls.dsde-alpha.broadinstitute.org'
-    },
-    'orc': {
-        'prod': 'https://firecloud-orchestration.dsde-prod.broadinstitute.org',
-        'staging': 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
-    },
-    'billing': {
-        'prod': 'broad-integration-testing',
-        'staging': 'drs-billing-project'
-    }
-}
-
 STAGE = os.environ.get('BDCAT_STAGE', 'staging')
 
 if STAGE == 'prod':
@@ -226,7 +211,7 @@ def create_terra_workspace(workspace):
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
-    data = dict(namespace='drs-billing-project',
+    data = dict(namespace=BILLING_PROJECT,
                 name=workspace,
                 authorizationDomain=[],
                 attributes={'description': ''},
@@ -290,9 +275,9 @@ def pfb_job_status_in_terra(workspace, job_id):
         resp.raise_for_status()
 
 
-def add_requester_pays_arg_to_url(url, billing_project='drs-billing-project'):
+def add_requester_pays_arg_to_url(url):
     endpoint, args = url.split('?', 1)
-    return f'{endpoint}?userProject={billing_project}&{args}'
+    return f'{endpoint}?userProject={BILLING_PROJECT}&{args}'
 
 
 @retry(error_codes={500, 502, 503, 504})
