@@ -16,6 +16,21 @@ GEN3_ENDPOINTS = {
     'prod': 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'
 }
 
+TERRA_ENDPOINTS = {
+    {
+        'rawls': {
+            'prod': 'https://rawls.broadinstitute.org',
+            'staging': 'https://rawls.dsde-alpha.broadinstitute.org'
+        },
+        'orc': {
+            'prod': 'https://firecloud-orchestration.broadinstitute.org',
+            'staging': 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
+        }
+    }
+}
+
+assert os.environ['BDCAT_STAGE'] in ['prod', 'staging'], 'Please set BDCAT_STAGE to "prod" or "staging".'
+
 try:
     GOOGLE_PROJECT_NAME = os.environ["GOOGLE_PROJECT_NAME"]
 except KeyError:
@@ -94,7 +109,7 @@ def fetch_google_secret(secret):
 
 @retry(error_codes={500, 502, 503, 504})
 def run_workflow():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['rawls'][os.environ['BDCAT_STAGE']]
     workspace = 'DRS-Test-Workspace'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions'
@@ -122,7 +137,7 @@ def run_workflow():
 
 @retry(error_codes={500, 502, 503, 504})
 def import_dockstore_wf_into_terra():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['rawls'][os.environ['BDCAT_STAGE']]
     workspace = 'BDC_Dockstore_Import_Test'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs'
@@ -155,7 +170,7 @@ def import_dockstore_wf_into_terra():
 
 @retry(error_codes={500, 502, 503, 504})
 def check_workflow_presence_in_terra_workspace():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['rawls'][os.environ['BDCAT_STAGE']]
     workspace = 'BDC_Dockstore_Import_Test'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/methodconfigs?allRepos=true'
@@ -171,7 +186,7 @@ def check_workflow_presence_in_terra_workspace():
 
 @retry(error_codes={500, 502, 503, 504})
 def delete_workflow_presence_in_terra_workspace():
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['rawls'][os.environ['BDCAT_STAGE']]
     workspace = 'BDC_Dockstore_Import_Test'
     billing_project = 'drs-billing-project'
     workflow = 'UM_aligner_wdl'
@@ -188,7 +203,7 @@ def delete_workflow_presence_in_terra_workspace():
 
 @retry(error_codes={500, 502, 503, 504})
 def check_workflow_status(submission_id):
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['rawls'][os.environ['BDCAT_STAGE']]
     workspace = 'DRS-Test-Workspace'
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}'
@@ -205,7 +220,8 @@ def check_workflow_status(submission_id):
 @retry(error_codes={500, 502, 503, 504})
 def check_terra_health():
     # note: the same endpoint seems to be at: https://api.alpha.firecloud.org/status
-    endpoint = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org/status'
+    domain = TERRA_ENDPOINTS['orc'][os.environ['BDCAT_STAGE']]
+    endpoint = f'{domain}/status'
 
     resp = requests.get(endpoint)
     resp.raise_for_status()
@@ -214,7 +230,7 @@ def check_terra_health():
 
 @retry(error_codes={500, 502, 503, 504})
 def create_terra_workspace(workspace):
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['rawls'][os.environ['BDCAT_STAGE']]
     endpoint = f'{domain}/api/workspaces'
 
     token = gs.get_access_token()
@@ -239,7 +255,7 @@ def create_terra_workspace(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def delete_terra_workspace(workspace):
-    domain = 'https://rawls.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['rawls'][os.environ['BDCAT_STAGE']]
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}'
 
@@ -254,7 +270,7 @@ def delete_terra_workspace(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def import_pfb(workspace):
-    domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['orc'][os.environ['BDCAT_STAGE']]
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB'
 
@@ -275,7 +291,7 @@ def import_pfb(workspace):
 
 @retry(error_codes={500, 502, 503, 504})
 def pfb_job_status_in_terra(workspace, job_id):
-    domain = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
+    domain = TERRA_ENDPOINTS['orc'][os.environ['BDCAT_STAGE']]
     billing_project = 'drs-billing-project'
     endpoint = f'{domain}/api/workspaces/{billing_project}/{workspace}/importPFB/{job_id}'
     token = gs.get_access_token()
