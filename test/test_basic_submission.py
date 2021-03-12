@@ -24,8 +24,7 @@ from test.utils import (run_workflow,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
-                        import_drs_from_gen3,
-                        STAGE)
+                        import_drs_from_gen3)
 
 logger = logging.getLogger(__name__)
 
