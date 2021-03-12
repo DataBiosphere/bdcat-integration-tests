@@ -13,7 +13,6 @@ import warnings
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
-from test.infra.testmode import staging_only
 from test.utils import (run_workflow,
                         create_terra_workspace,
                         delete_terra_workspace,
@@ -106,7 +105,6 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Dockstore Check Workflow Not Seen'):
             self.assertFalse(wf_seen_in_terra)
 
-    @staging_only
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
@@ -166,7 +164,6 @@ class TestGen3DataAccess(unittest.TestCase):
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
 
-    @staging_only
     def test_import_drs_from_gen3(self):
         # file is ~1gb, so only download the first byte to check for access
         import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7')
