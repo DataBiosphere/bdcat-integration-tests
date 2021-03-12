@@ -13,12 +13,12 @@ from terra_notebook_utils import gs
 STAGE = os.environ.get('BDCAT_STAGE', 'staging')
 
 if STAGE == 'prod':
-    GEN3_DOMAIN = 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'
+    GEN3_DOMAIN = 'https://gen3.biodatacatalyst.nhlbi.nih.gov'
     RAWLS_DOMAIN = 'https://rawls.dsde-prod.broadinstitute.org'
     ORC_DOMAIN = 'https://firecloud-orchestration.dsde-prod.broadinstitute.org'
     BILLING_PROJECT = 'broad-integration-testing'
 elif STAGE == 'staging':
-    GEN3_DOMAIN = 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/'
+    GEN3_DOMAIN = 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov'
     RAWLS_DOMAIN = 'https://rawls.dsde-alpha.broadinstitute.org'
     ORC_DOMAIN = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
     BILLING_PROJECT = 'drs-billing-project'
@@ -288,7 +288,7 @@ def import_drs_from_gen3(guid: str) -> requests.Response:
         guid = guid[len('drs://'):]
     else:
         raise ValueError(f'DRS URI is missing the "drs://" schema.  Please specify a DRS URI, not: {guid}')
-    gen3_endpoint = f'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{guid}'
+    gen3_endpoint = f'{GEN3_DOMAIN}/user/data/download/{guid}'
     token = gs.get_access_token()
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
@@ -296,7 +296,6 @@ def import_drs_from_gen3(guid: str) -> requests.Response:
     gen3_resp = requests.get(gen3_endpoint, headers=headers)
 
     if gen3_resp.ok:
-
         # Example of the url that gen3 returns:
         #   google_uri = 'https://storage.googleapis.com/fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.gVCF.2019-02-06/Sample_HG03611/analysis/HG03611.haplotypeCalls.er.raw.g.vcf.gz'
         #   access_id_arg = 'GoogleAccessId=cirrus@stagingdatastage.iam.gserviceaccount.com'

@@ -9,10 +9,6 @@ import shutil
 import requests
 import datetime
 import warnings
-import google.cloud.storage
-
-from gen3.submission import Gen3Submission
-from gen3.auth import Gen3Auth
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
@@ -30,8 +26,7 @@ from test.utils import (run_workflow,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
                         import_drs_from_gen3,
-                        STAGE,
-                        GEN3_DOMAIN)
+                        STAGE)
 
 logger = logging.getLogger(__name__)
 
