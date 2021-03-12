@@ -189,11 +189,10 @@ class TestGen3DataAccess(unittest.TestCase):
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
 
+    @staging_only
     def test_import_drs_from_gen3(self):
         # file is ~1gb, so only download the first byte to check for access
-
-        if os.environ['BDCAT_STAGE'] == 'staging':
-            import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7')
+        import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7')
 
         # TODO: Investigate the following:
         # the following file is 5b, but we get a "Not enough segments" Error, so there may be problems with small files:
