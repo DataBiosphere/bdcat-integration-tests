@@ -47,7 +47,7 @@ class TestGen3DataAccess(unittest.TestCase):
                         os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
         except shutil.SameFileError:
             pass
-        print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
+        print(f'Terra Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
     def tearDownClass(cls) -> None:
