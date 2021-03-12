@@ -10,19 +10,15 @@ from requests.exceptions import HTTPError
 
 from terra_notebook_utils import gs
 
-
-GEN3_CONFIG = {
-    'staging': 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/',
-    'prod': 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'
-}
-
 STAGE = os.environ.get('BDCAT_STAGE', 'staging')
 
 if STAGE == 'prod':
+    GEN3_DOMAIN = 'https://gen3.biodatacatalyst.nhlbi.nih.gov/'
     RAWLS_DOMAIN = 'https://rawls.dsde-prod.broadinstitute.org'
     ORC_DOMAIN = 'https://firecloud-orchestration.dsde-prod.broadinstitute.org'
     BILLING_PROJECT = 'broad-integration-testing'
 elif STAGE == 'staging':
+    GEN3_DOMAIN = 'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/'
     RAWLS_DOMAIN = 'https://rawls.dsde-alpha.broadinstitute.org'
     ORC_DOMAIN = 'https://firecloud-orchestration.dsde-alpha.broadinstitute.org'
     BILLING_PROJECT = 'drs-billing-project'
