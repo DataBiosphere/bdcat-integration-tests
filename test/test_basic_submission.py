@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
+#!/usr/bin/env python3
 import logging
 import sys
 import unittest
@@ -10,14 +9,11 @@ import shutil
 import requests
 import datetime
 import warnings
-import google.cloud.storage
-
-from gen3.submission import Gen3Submission
-from gen3.auth import Gen3Auth
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
+from test.infra.testmode import staging_only
 from test.utils import (run_workflow,
                         create_terra_workspace,
                         delete_terra_workspace,
@@ -30,9 +26,7 @@ from test.utils import (run_workflow,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
                         import_drs_from_gen3,
-                        GEN3_ENDPOINTS)
-
-from terra_notebook_utils import drs
+                        STAGE)
 
 logger = logging.getLogger(__name__)
 
@@ -48,9 +42,6 @@ class TestGen3DataAccess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
-        cls.gen3_endpoint = GEN3_ENDPOINTS['staging']
-        with open(os.environ['GEN3KEY'], 'r') as f:
-            cls.gen3_key = json.loads(f.read())
         if not os.path.exists(gcloud_cred_dir):
             os.makedirs(gcloud_cred_dir, exist_ok=True)
         try:
@@ -58,23 +49,10 @@ class TestGen3DataAccess(unittest.TestCase):
                         os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
         except shutil.SameFileError:
             pass
-        cls.gen3_auth_client = Gen3Auth(endpoint=cls.gen3_endpoint, refresh_token=cls.gen3_key)
-        cls.gen3_sub_client = Gen3Submission(endpoint=cls.gen3_endpoint, auth_provider=cls.gen3_auth_client)
-        cls.google_storage_client = google.cloud.storage.Client(project=os.environ['GOOGLE_PROJECT_ID'])
-        cls.output_tsv_path = os.path.join(pkg_root, 'test_gen3_node.tsv')
-        cls.gen3_manifest_path = os.path.join(pkg_root, 'test_gen3_manifest.csv')
-        cls.drs_file_path = None
-
-        print(f'Terra [Alpha] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
+        print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
     def tearDownClass(cls) -> None:
-        if os.path.exists(cls.output_tsv_path):
-            os.remove(cls.output_tsv_path)
-        if os.path.exists(cls.gen3_manifest_path):
-            os.remove(cls.gen3_manifest_path)
-        if cls.drs_file_path and os.path.exists(cls.drs_file_path):
-            os.remove(cls.drs_file_path)
         try:
             delete_workflow_presence_in_terra_workspace()
         except:
@@ -128,6 +106,7 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Dockstore Check Workflow Not Seen'):
             self.assertFalse(wf_seen_in_terra)
 
+    @staging_only
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
@@ -174,7 +153,7 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Check on the import static pfb job status.'):
             response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
             # this should take < 60 seconds
-            while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting']:
+            while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting', 'Pending']:
                 time.sleep(2)
                 response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
             self.assertTrue(response['status'] == 'Done',
@@ -187,6 +166,7 @@ class TestGen3DataAccess(unittest.TestCase):
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
 
+    @staging_only
     def test_import_drs_from_gen3(self):
         # file is ~1gb, so only download the first byte to check for access
         import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7')
