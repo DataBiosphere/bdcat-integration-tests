@@ -3,18 +3,10 @@ set -a
 # Resolve the location of this file and set BDCAT_HOME to the root
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
-export BDCAT_HOME="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
-BDCAT_STAGE=prod
-
-# these are only coincidentally the same
-GOOGLE_PROJECT_NAME='aj-saturn-e2e-testing-dev'
-GOOGLE_PROJECT_ID='aj-saturn-e2e-testing-dev'
-
+BDCAT_HOME="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 # GEN3KEY=/home/quokka/.credentials/gen3.key
 # TEST_MULE_CREDENTIALS='/home/quokka/.config/gcloud/application_default_credentials.json'
-TERRA_STAGING_WORKSPACE='DRS-Test-Workspace'
-GOOGLE_TEST_ACCOUNT='drs-billing-project'  # active on (Terra) staging
 set +a
 
 unset GOOGLE_APPLICATION_CREDENTIALS
