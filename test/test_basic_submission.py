@@ -33,8 +33,6 @@ from test.utils import (run_workflow,
                         STAGE,
                         GEN3_DOMAIN)
 
-from terra_notebook_utils import drs
-
 logger = logging.getLogger(__name__)
 
 
