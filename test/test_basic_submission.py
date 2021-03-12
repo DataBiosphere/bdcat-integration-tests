@@ -18,6 +18,7 @@ from gen3.auth import Gen3Auth
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
+from test.infra.testmode import staging_only
 from test.utils import (run_workflow,
                         create_terra_workspace,
                         delete_terra_workspace,
@@ -128,6 +129,7 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Dockstore Check Workflow Not Seen'):
             self.assertFalse(wf_seen_in_terra)
 
+    @staging_only
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
