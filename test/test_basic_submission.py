@@ -54,11 +54,6 @@ class TestGen3DataAccess(unittest.TestCase):
                         os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
         except shutil.SameFileError:
             pass
-        with open(os.environ['GEN3KEY'], 'r') as f:
-            cls.gen3_key = json.loads(f.read())
-        cls.gen3_auth_client = Gen3Auth(endpoint=GEN3_DOMAIN, refresh_token=cls.gen3_key)
-        cls.gen3_sub_client = Gen3Submission(endpoint=GEN3_DOMAIN, auth_provider=cls.gen3_auth_client)
-        cls.google_storage_client = google.cloud.storage.Client(project=os.environ['GOOGLE_PROJECT_ID'])
         print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
