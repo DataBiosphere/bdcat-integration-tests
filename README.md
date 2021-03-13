@@ -94,3 +94,4 @@ API Test 3:
  - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}/submissions/{submission_id}
  - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces
  - https://rawls.dsde-alpha.broadinstitute.org/api/workspaces/{billing_project}/{workspace}
+ - https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{guid}
