@@ -26,7 +26,8 @@ from test.utils import (run_workflow,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
-                        import_drs_from_gen3)
+                        import_drs_from_gen3,
+                        BILLING_PROJECT)
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +169,8 @@ class TestGen3DataAccess(unittest.TestCase):
     def test_public_data_access(self):
         # this DRS URI only exists on staging/alpha
         os.environ['TERRA_DEPLOYMENT_ENV'] = 'alpha'
-        tnu.drs.head('drs://dg.712C/fa640b0e-9779-452f-99a6-16d833d15bd0')
+        tnu.drs.head('drs://dg.712C/fa640b0e-9779-452f-99a6-16d833d15bd0',
+                     workspace_name='DRS-Test-Workspace', workspace_namespace=BILLING_PROJECT)
         del os.environ['TERRA_DEPLOYMENT_ENV']
 
     def test_import_drs_from_gen3(self):
