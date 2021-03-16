@@ -21,3 +21,7 @@ prod:
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - pip install flake8==3.8.3 && make lint
     - BDCAT_STAGE=prod test/test_basic_submission.py
+  only:
+    - prod
+  except:
+    - schedules
