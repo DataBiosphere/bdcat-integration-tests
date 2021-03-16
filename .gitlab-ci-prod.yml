@@ -13,21 +13,11 @@ after_script:
   - virtualenv -p python3.8 venv && . venv/bin/activate && pip install requests
   - python scripts/post_to_slack.py
 
-staging:
+prod:
   stage: test
   script:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - pip install flake8==3.8.3 && make lint
-    - BDCAT_STAGE=staging test/test_basic_submission.py
-
-scheduled_tests:
-  only:
-    - schedules
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - pip install flake8 && make lint
-    - BDCAT_STAGE=staging test/test_basic_submission.py
+    - BDCAT_STAGE=prod test/test_basic_submission.py
