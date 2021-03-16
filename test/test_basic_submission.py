@@ -171,11 +171,9 @@ class TestGen3DataAccess(unittest.TestCase):
 
     @staging_only
     def test_controlled_data_access(self):
-        # this DRS URI only exists on staging/alpha
-        os.environ['TERRA_DEPLOYMENT_ENV'] = 'alpha'
+        # this DRS URI only exists on staging/alpha and requires os.environ['TERRA_DEPLOYMENT_ENV'] = 'alpha'
         tnu.drs.head('drs://dg.712C/04fbb96d-68c9-4922-801e-9b1350be3b94',
                      workspace_name='DRS-Test-Workspace', workspace_namespace=BILLING_PROJECT)
-        del os.environ['TERRA_DEPLOYMENT_ENV']
 
     @staging_only
     def test_import_drs_from_gen3(self):
