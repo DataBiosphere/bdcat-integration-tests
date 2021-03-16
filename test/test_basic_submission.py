@@ -168,14 +168,12 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(response.status_code == 202)
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
- 
+
     @staging_only
     def test_public_data_access(self):
-        # this DRS URI only exists on staging/alpha
-        os.environ['TERRA_DEPLOYMENT_ENV'] = 'alpha'
+        # this DRS URI only exists on staging/alpha and requires os.environ['TERRA_DEPLOYMENT_ENV'] = 'alpha'
         tnu.drs.head('drs://dg.712C/fa640b0e-9779-452f-99a6-16d833d15bd0',
                      workspace_name='DRS-Test-Workspace', workspace_namespace=BILLING_PROJECT)
-        del os.environ['TERRA_DEPLOYMENT_ENV']
 
     @staging_only
     def test_import_drs_from_gen3(self):
