@@ -20,7 +20,7 @@ staging:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - pip install flake8==3.8.3 && make lint
-    - BDCAT_STAGE=staging test/test_basic_submission.py
+    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
 
 scheduled_tests:
   only:
@@ -30,4 +30,4 @@ scheduled_tests:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - pip install flake8 && make lint
-    - BDCAT_STAGE=staging test/test_basic_submission.py
+    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
