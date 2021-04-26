@@ -115,8 +115,38 @@ def run_workflow():
 
 
 @retry(error_codes={500, 502, 503, 504})
-def import_dockstore_wf_into_terra():
-    workspace = 'BDC_Dockstore_Import_Test'
+def import_dockstore_wf_via_firecloud_api(workspace: str, method_name: str, method_path: str, method_version: str):
+    # endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/methodconfigs'
+    official_domain = 'https://api.firecloud.org'
+    endpoint = f'{official_domain}/api/workspaces/{BILLING_PROJECT}/{workspace}/method_configs/dockstore/md5sum'
+    token = gs.get_access_token()
+    headers = {'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    data = {
+        "namespace": BILLING_PROJECT,
+        "name": method_name,
+        "rootEntityType": "",
+        "inputs": {},
+        "outputs": {},
+        "prerequisites": {},
+        "methodRepoMethod": {
+            "sourceRepo": "dockstore",
+            "methodPath": method_path,
+            "methodVersion": method_version
+        },
+        "methodConfigVersion": 1,
+        "deleted": False
+    }
+
+    resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
+    resp.raise_for_status()
+    return resp.json()
+
+
+@retry(error_codes={500, 502, 503, 504})
+def import_dockstore_wf_into_terra(workspace: str, method_name: str, method_path: str, method_version: str):
     endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/methodconfigs'
 
     token = gs.get_access_token()
@@ -126,15 +156,15 @@ def import_dockstore_wf_into_terra():
 
     data = {
         "namespace": BILLING_PROJECT,
-        "name": "UM_aligner_wdl",
+        "name": method_name,
         "rootEntityType": "",
         "inputs": {},
         "outputs": {},
         "prerequisites": {},
         "methodRepoMethod": {
             "sourceRepo": "dockstore",
-            "methodPath": "github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl",
-            "methodVersion": "1.32.0"
+            "methodPath": method_path,
+            "methodVersion": method_version
         },
         "methodConfigVersion": 1,
         "deleted": False

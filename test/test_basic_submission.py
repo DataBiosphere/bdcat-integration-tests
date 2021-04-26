@@ -24,6 +24,7 @@ from test.utils import (run_workflow,
                         retry,
                         check_terra_health,
                         import_dockstore_wf_into_terra,
+                        import_dockstore_wf_via_firecloud_api,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
@@ -62,20 +63,42 @@ class TestGen3DataAccess(unittest.TestCase):
             pass
 
     @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
+    def test_dockstore_import(self):
+        # import the workflow into terra
+        workspace = 'DRS-Test-Workspace'
+        method_name = 'md5sum'
+        method_path = 'github.com/briandoconnor/dockstore-tool-md5sum'
+        method_version = '1.0.4'
+        response = import_dockstore_wf_via_firecloud_api(workspace=workspace,
+                                                  method_name=method_name,
+                                                  method_path=method_path,
+                                                  method_version=method_version)
+
+    @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
     def test_dockstore_import_in_terra(self):
         # import the workflow into terra
-        response = import_dockstore_wf_into_terra()
+        workspace = 'BDC_Dockstore_Import_Test'
+        method_name = 'UM_aligner_wdl'
+        method_path = 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl'
+        method_version = '1.32.0'
+        response = import_dockstore_wf_into_terra(workspace=workspace,
+                                                  method_name=method_name,
+                                                  method_path=method_path,
+                                                  method_version=method_version)
         method_info = response['methodConfiguration']['methodRepoMethod']
         with self.subTest('Dockstore Import Response: sourceRepo'):
             self.assertEqual(method_info['sourceRepo'], 'dockstore')
         with self.subTest('Dockstore Import Response: methodPath'):
-            self.assertEqual(method_info['methodPath'], 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl')
+            self.assertEqual(method_info['methodPath'], method_path)
         with self.subTest('Dockstore Import Response: methodVersion'):
-            self.assertEqual(method_info['methodVersion'], '1.32.0')
+            self.assertEqual(method_info['methodVersion'], method_version)
 
         # check that a second attempt gives a 409 error
         try:
-            import_dockstore_wf_into_terra()
+            import_dockstore_wf_into_terra(workspace=workspace,
+                                           method_name=method_name,
+                                           method_path=method_path,
+                                           method_version=method_version)
         except requests.exceptions.HTTPError as e:
             with self.subTest('Dockstore Import Response: 409 conflict'):
                 self.assertEqual(e.response.status_code, 409)
@@ -85,9 +108,9 @@ class TestGen3DataAccess(unittest.TestCase):
         response = check_workflow_presence_in_terra_workspace()
         for wf_response in response:
             method_info = wf_response['methodRepoMethod']
-            if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
+            if method_info['methodPath'] == method_path \
                     and method_info['sourceRepo'] == 'dockstore' \
-                    and method_info['methodVersion'] == '1.32.0':
+                    and method_info['methodVersion'] == method_version:
                 wf_seen_in_terra = True
                 break
         with self.subTest('Dockstore Check Workflow Seen'):
@@ -101,15 +124,14 @@ class TestGen3DataAccess(unittest.TestCase):
         response = check_workflow_presence_in_terra_workspace()
         for wf_response in response:
             method_info = wf_response['methodRepoMethod']
-            if method_info['methodPath'] == 'github.com/DataBiosphere/topmed-workflows/UM_aligner_wdl' \
+            if method_info['methodPath'] == method_path \
                     and method_info['sourceRepo'] == 'dockstore' \
-                    and method_info['methodVersion'] == '1.32.0':
+                    and method_info['methodVersion'] == method_version:
                 wf_seen_in_terra = True
                 break
         with self.subTest('Dockstore Check Workflow Not Seen'):
             self.assertFalse(wf_seen_in_terra)
 
-    @staging_only
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
