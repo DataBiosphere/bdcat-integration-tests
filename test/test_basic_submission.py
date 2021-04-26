@@ -62,17 +62,17 @@ class TestGen3DataAccess(unittest.TestCase):
         except:
             pass
 
-    @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
-    def test_dockstore_import(self):
-        # import the workflow into terra
-        workspace = 'DRS-Test-Workspace'
-        method_name = 'md5sum'
-        method_path = 'github.com/briandoconnor/dockstore-tool-md5sum'
-        method_version = '1.0.4'
-        response = import_dockstore_wf_via_firecloud_api(workspace=workspace,
-                                                  method_name=method_name,
-                                                  method_path=method_path,
-                                                  method_version=method_version)
+    # @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
+    # def test_dockstore_import(self):
+    #     # import the workflow into terra
+    #     workspace = 'DRS-Test-Workspace'
+    #     method_name = 'md5sum'
+    #     method_path = 'github.com/briandoconnor/dockstore-tool-md5sum'
+    #     method_version = '1.0.4'
+    #     response = import_dockstore_wf_via_firecloud_api(workspace=workspace,
+    #                                               method_name=method_name,
+    #                                               method_path=method_path,
+    #                                               method_version=method_version)
 
     @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
     def test_dockstore_import_in_terra(self):
