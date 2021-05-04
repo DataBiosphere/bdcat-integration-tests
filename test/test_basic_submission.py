@@ -8,6 +8,7 @@ import time
 import requests
 import datetime
 import warnings
+import base64
 
 import terra_notebook_utils as tnu
 
@@ -47,10 +48,7 @@ class TestGen3DataAccess(unittest.TestCase):
         if not os.path.exists(gcloud_cred_dir):
             os.makedirs(gcloud_cred_dir, exist_ok=True)
         with open(os.path.expanduser('~/.config/gcloud/application_default_credentials.json'), 'w') as f:
-            f.write(json.dumps({'client_id': os.environ['TEST_MULE_CLIENT_ID'],
-                                'client_secret': os.environ['TEST_MULE_CLIENT'],
-                                'refresh_token': os.environ['TEST_MULE_REFRESH_TOKEN'],
-                                'type': os.environ['TEST_MULE_TYPE']}))
+            f.write(json.dumps(base64.decodebytes(os.environ['TEST_MULE_CREDS'].encode('utf-8'))))
         print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
