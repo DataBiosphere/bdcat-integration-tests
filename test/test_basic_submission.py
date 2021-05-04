@@ -47,11 +47,9 @@ class TestGen3DataAccess(unittest.TestCase):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
         if not os.path.exists(gcloud_cred_dir):
             os.makedirs(gcloud_cred_dir, exist_ok=True)
-        try:
-            shutil.copy(os.environ['TEST_MULE_CREDENTIALS'],
-                        os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
-        except shutil.SameFileError:
-            pass
+        with open(os.path.expanduser('~/.config/gcloud/application_default_credentials.json'), 'w') as f:
+            f.write(json.dumps({'api_key': os.environ['TEST_MULE_API_KEY'],
+                                'key_id': os.environ['TEST_MULE_API_KEY_ID']}))
         print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
