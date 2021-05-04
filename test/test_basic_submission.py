@@ -5,7 +5,6 @@ import unittest
 import os
 import json
 import time
-import shutil
 import requests
 import datetime
 import warnings
@@ -48,8 +47,10 @@ class TestGen3DataAccess(unittest.TestCase):
         if not os.path.exists(gcloud_cred_dir):
             os.makedirs(gcloud_cred_dir, exist_ok=True)
         with open(os.path.expanduser('~/.config/gcloud/application_default_credentials.json'), 'w') as f:
-            f.write(json.dumps({'api_key': os.environ['TEST_MULE_API_KEY'],
-                                'key_id': os.environ['TEST_MULE_API_KEY_ID']}))
+            f.write(json.dumps({'client_id': os.environ['TEST_MULE_CLIENT_ID'],
+                                'client_secret': os.environ['TEST_MULE_CLIENT'],
+                                'refresh_token': os.environ['TEST_MULE_REFRESH_TOKEN'],
+                                'type': os.environ['TEST_MULE_TYPE']}))
         print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
