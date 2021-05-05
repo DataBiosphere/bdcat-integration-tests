@@ -19,8 +19,13 @@ staging:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - pip install flake8==3.8.3 && make lint
-    - BDCAT_STAGE=staging test/test_basic_submission.py
+    - make lint
+    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
+  only:
+    - master
+    - staging
+  except:
+    - schedules
 
 prod:
   stage: test
@@ -28,8 +33,34 @@ prod:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - pip install flake8==3.8.3 && make lint
+    - make lint
     - BDCAT_STAGE=prod test/test_basic_submission.py
+  only:
+    - prod
+  except:
+    - schedules
+
+dev-prod:
+  stage: test
+  script:
+    - source environment
+    - virtualenv -p python3.8 venv && . venv/bin/activate
+    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
+    - make lint
+    - BDCAT_STAGE=prod test/test_basic_submission.py
+  except:
+    - schedules
+
+dev-staging:
+  stage: test
+  script:
+    - source environment
+    - virtualenv -p python3.8 venv && . venv/bin/activate
+    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
+    - make lint
+    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
+  except:
+    - schedules
 
 scheduled_tests:
   only:
@@ -38,5 +69,5 @@ scheduled_tests:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - pip install flake8 && make lint
-    - test/test_basic_submission.py
+    - make lint
+    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py

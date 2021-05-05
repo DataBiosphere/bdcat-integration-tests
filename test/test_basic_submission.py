@@ -5,10 +5,12 @@ import unittest
 import os
 import json
 import time
-import shutil
 import requests
 import datetime
 import warnings
+import base64
+
+import terra_notebook_utils as tnu
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
@@ -26,6 +28,7 @@ from test.utils import (run_workflow,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
                         import_drs_from_gen3,
+                        BILLING_PROJECT,
                         STAGE)
 
 logger = logging.getLogger(__name__)
@@ -44,11 +47,8 @@ class TestGen3DataAccess(unittest.TestCase):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
         if not os.path.exists(gcloud_cred_dir):
             os.makedirs(gcloud_cred_dir, exist_ok=True)
-        try:
-            shutil.copy(os.environ['TEST_MULE_CREDENTIALS'],
-                        os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
-        except shutil.SameFileError:
-            pass
+        with open(os.path.expanduser('~/.config/gcloud/application_default_credentials.json'), 'w') as f:
+            f.write(base64.decodebytes(os.environ['TEST_MULE_CREDS'].encode('utf-8')).decode('utf-8'))
         print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
@@ -165,6 +165,18 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(response.status_code == 202)
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
+
+    @staging_only
+    def test_public_data_access(self):
+        # this DRS URI only exists on staging/alpha and requires os.environ['TERRA_DEPLOYMENT_ENV'] = 'alpha'
+        tnu.drs.head('drs://dg.712C/fa640b0e-9779-452f-99a6-16d833d15bd0',
+                     workspace_name='DRS-Test-Workspace', workspace_namespace=BILLING_PROJECT)
+
+    @staging_only
+    def test_controlled_data_access(self):
+        # this DRS URI only exists on staging/alpha and requires os.environ['TERRA_DEPLOYMENT_ENV'] = 'alpha'
+        tnu.drs.head('drs://dg.712C/04fbb96d-68c9-4922-801e-9b1350be3b94',
+                     workspace_name='DRS-Test-Workspace', workspace_namespace=BILLING_PROJECT)
 
     @staging_only
     def test_import_drs_from_gen3(self):

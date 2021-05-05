@@ -13,6 +13,7 @@ cli-builder==0.1.5
 click==7.1.2
 cryptography==3.4.4
 firecloud==0.16.31
+flake8==3.8.3
 gen3==2.2.3
 google-api-core==1.26.0
 google-auth==1.26.1
