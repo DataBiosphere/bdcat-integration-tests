@@ -47,7 +47,7 @@ dev-prod:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - pip install flake8==3.8.3 && make lint
-    - BDCAT_STAGE=prod TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
+    - BDCAT_STAGE=prod test/test_basic_submission.py
   except:
     - schedules
 
