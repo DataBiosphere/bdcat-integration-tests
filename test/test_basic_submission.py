@@ -5,10 +5,10 @@ import unittest
 import os
 import json
 import time
-import shutil
 import requests
 import datetime
 import warnings
+import base64
 
 import terra_notebook_utils as tnu
 
@@ -47,11 +47,8 @@ class TestGen3DataAccess(unittest.TestCase):
         gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
         if not os.path.exists(gcloud_cred_dir):
             os.makedirs(gcloud_cred_dir, exist_ok=True)
-        try:
-            shutil.copy(os.environ['TEST_MULE_CREDENTIALS'],
-                        os.path.expanduser('~/.config/gcloud/application_default_credentials.json'))
-        except shutil.SameFileError:
-            pass
+        with open(os.path.expanduser('~/.config/gcloud/application_default_credentials.json'), 'w') as f:
+            f.write(base64.decodebytes(os.environ['TEST_MULE_CREDS'].encode('utf-8')).decode('utf-8'))
         print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
 
     @classmethod
