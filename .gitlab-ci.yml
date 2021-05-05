@@ -50,6 +50,8 @@ dev-prod:
     - BDCAT_STAGE=prod test/test_basic_submission.py
   except:
     - schedules
+    - staging
+    - master
 
 dev-staging:
   stage: test
@@ -61,6 +63,7 @@ dev-staging:
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
   except:
     - schedules
+    - prod
 
 scheduled_tests:
   only:
