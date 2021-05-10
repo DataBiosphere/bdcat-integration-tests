@@ -55,7 +55,7 @@ class TestGen3DataAccess(unittest.TestCase):
     def tearDownClass(cls) -> None:
         try:
             delete_workflow_presence_in_terra_workspace()
-        except:
+        except:  # noqa
             pass
 
     @retry(errors={requests.exceptions.HTTPError}, error_codes={409})

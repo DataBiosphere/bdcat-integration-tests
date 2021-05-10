@@ -37,14 +37,14 @@ class TestGen3VersionsAcrossEnvironments(unittest.TestCase):
         '''
         log.info("checking the gen3 release version on bdcat prod...")
         bdcat_prod_version_json = requests.get(
-          f"{bdcat_prod_url}/index/_version"
+            f"{bdcat_prod_url}/index/_version"
         ).json()
         # extract version from json payload
         bdcat_prod_version = bdcat_prod_version_json['version']
 
         log.info("checking the gen3 release version on bdcat staging...")
         bdcat_staging_version_json = requests.get(
-          f"{bdcat_staging_url}/index/_version"
+            f"{bdcat_staging_url}/index/_version"
         ).json()
         bdcat_staging_version = bdcat_staging_version_json['version']
 
