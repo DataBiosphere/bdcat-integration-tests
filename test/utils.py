@@ -5,7 +5,7 @@ import hashlib
 import functools
 import time
 
-from typing import List, Set
+from typing import List, Set, Optional
 from requests.exceptions import HTTPError
 
 from terra_notebook_utils import gs
@@ -26,9 +26,9 @@ else:
     raise ValueError('Please set BDCAT_STAGE to "prod" or "staging".')
 
 
-def retry(intervals: List = [1, 1, 2, 4, 8],
-          errors: Set = {HTTPError},
-          error_codes: Set = {}):
+def retry(intervals: Optional[List] = None,
+          errors: Optional[Set] = None,
+          error_codes: Optional[Set] = None):
     """
     Retry a function if it fails with any Exception defined in the "errors" set, every x seconds,
     where x is defined by a list of floats in "intervals".  If "error_codes" are specified,
@@ -59,6 +59,13 @@ def retry(intervals: List = [1, 1, 2, 4, 8],
 
     :return: The result of the wrapped function or raise.
     """
+    if intervals is None:
+        intervals = [1, 1, 2, 4, 8]
+    if errors is None:
+        errors = {HTTPError}
+    if errors is None:
+        error_codes = {}
+
     def decorate(func):
         @functools.wraps(func)
         def call(*args, **kwargs):
