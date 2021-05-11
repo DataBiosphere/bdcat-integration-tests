@@ -64,6 +64,7 @@ dev-prod:
     - BDCAT_STAGE=prod test/test_basic_submission.py
   except:
     - schedules
+    - prod
     - staging
     - master
 
@@ -78,6 +79,8 @@ dev-staging:
   except:
     - schedules
     - prod
+    - staging
+    - master
 
 scheduled_tests:
   only:
