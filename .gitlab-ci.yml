@@ -27,6 +27,20 @@ staging:
   except:
     - schedules
 
+version_check:
+  stage: test
+  script:
+    - source environment
+    - virtualenv -p python3.8 venv && . venv/bin/activate
+    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
+    - make lint
+    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_version_check.py
+  only:
+    - master
+    - staging
+  except:
+    - schedules
+
 prod:
   stage: test
   script:
@@ -50,6 +64,9 @@ dev-prod:
     - BDCAT_STAGE=prod test/test_basic_submission.py
   except:
     - schedules
+    - prod
+    - staging
+    - master
 
 dev-staging:
   stage: test
@@ -61,6 +78,9 @@ dev-staging:
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
   except:
     - schedules
+    - prod
+    - staging
+    - master
 
 scheduled_tests:
   only:
