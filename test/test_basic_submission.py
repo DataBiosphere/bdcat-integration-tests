@@ -55,7 +55,7 @@ class TestGen3DataAccess(unittest.TestCase):
     def tearDownClass(cls) -> None:
         try:
             delete_workflow_presence_in_terra_workspace()
-        except:
+        except:  # noqa
             pass
 
     @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
@@ -162,7 +162,10 @@ class TestGen3DataAccess(unittest.TestCase):
 
         with self.subTest('Delete the terra workspace.'):
             response = delete_terra_workspace(workspace=workspace_name)
-            self.assertTrue(response.status_code == 202)
+            if not response.ok:
+                raise RuntimeError(f'Could not delete the workspace "{workspace_name}": [{response.status_code}] {response}')
+            if response.status_code != 202:
+                logger.critical(f'Response {response.status_code} has changed: {response}')
             response = delete_terra_workspace(workspace=workspace_name)
             self.assertTrue(response.status_code == 404)
 
