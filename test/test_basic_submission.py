@@ -182,6 +182,56 @@ class TestGen3DataAccess(unittest.TestCase):
                      workspace_name='DRS-Test-Workspace', workspace_namespace=BILLING_PROJECT)
 
     @staging_only
+    def test_selenium_RAS_login(self):
+        from selenium import webdriver
+        from selenium.webdriver.common.keys import Keys
+        from selenium.common.exceptions import NoSuchElementException
+
+        driver = webdriver.Firefox()
+        driver.get(
+            "https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/oauth2/authorize?"
+            "response_type=code&"
+            "client_id=4EmZnWKVMoPyhdJMh7EB8SSl3Uojo20QfsAR77gu&"
+            "redirect_uri=https%3A%2F%2Falpha.terra.biodatacatalyst.nhlbi.nih.gov%2F%23fence-callback&"
+            "scope=openid+google_credentials+data+user&"
+            "idp=ras"
+        )
+
+        if driver.title != 'Sign In - NIH Login':
+            print(f'Warning, the website title message has changed bro.')
+
+        username_box = driver.find_element_by_name("USER")
+        username_box.clear()
+        username_box.send_keys(os.environ['RAS_USER'])
+
+        password_box = driver.find_element_by_name("PASSWORD")
+        password_box.clear()
+        password_box.send_keys(base64.decodebytes(os.environ['RASP'].encode('utf-8')).decode('utf-8'))
+        password_box.send_keys(Keys.RETURN)
+
+        time.sleep(5)  # let the page load...
+        timeout = 60
+        while timeout > 0:
+            try:
+                accept_button = driver.find_element_by_xpath('//button[normalize-space()="Yes, I authorize."]')
+                accept_button.click()
+                break
+            except NoSuchElementException:
+                time.sleep(2)
+                timeout -= 2
+
+        time.sleep(5)  # let the page load...
+        timeout = 60
+        while timeout > 0:
+            try:
+                # if this exists, we've successfully logged in
+                driver.find_element_by_xpath('//h1[normalize-space()="Welcome to NHLBI BioData Catalyst"]')
+                break
+            except NoSuchElementException:
+                time.sleep(2)
+                timeout -= 2
+
+    @staging_only
     def test_import_drs_from_gen3(self):
         # file is ~1gb, so only download the first byte to check for access
         import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7')

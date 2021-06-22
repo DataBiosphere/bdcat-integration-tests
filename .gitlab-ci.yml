@@ -3,11 +3,20 @@ image: ubuntu:18.04
 stages:
   - test
 
+variables:
+  PATH: "$PATH:/opt/webdriver"
+
 before_script:
   - date && date -u
   - apt-get update && apt-get install -y python3.8 python3.8-dev python3-pip python-pip virtualenv git apt-transport-https ca-certificates gnupg curl software-properties-common
   - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && apt-get update -y && apt-get install google-cloud-sdk -y
   - apt-get -y upgrade
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.29.1/geckodriver-v0.29.1-linux64.tar.gz
+  - tar xzf geckodriver-v0.29.1-linux64.tar.gz
+  - rm geckodriver-v0.29.1-linux64.tar.gz
+  - mkdir /opt/webdriver
+  - mv geckodriver /opt/webdriver/geckodriver
+  - chmod 755 /opt/webdriver/geckodriver
 
 after_script:
   - virtualenv -p python3.8 venv && . venv/bin/activate && pip install requests
