@@ -3,9 +3,6 @@ image: ubuntu:18.04
 stages:
   - test
 
-variables:
-  PATH: "$PATH:/opt/webdriver"
-
 before_script:
   - date && date -u
   - apt-get update && apt-get install -y python3.8 python3.8-dev python3-pip python-pip virtualenv git apt-transport-https ca-certificates gnupg curl software-properties-common
@@ -29,6 +26,7 @@ staging:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
+    - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
   only:
     - master
@@ -57,6 +55,7 @@ prod:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
+    - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=prod test/test_basic_submission.py
   only:
     - prod
@@ -70,6 +69,7 @@ dev-prod:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
+    - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=prod test/test_basic_submission.py
   except:
     - schedules
@@ -84,6 +84,7 @@ dev-staging:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
+    - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
   except:
     - schedules
@@ -99,4 +100,5 @@ scheduled_tests:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
+    - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
