@@ -186,8 +186,10 @@ class TestGen3DataAccess(unittest.TestCase):
         from selenium import webdriver
         from selenium.webdriver.common.keys import Keys
         from selenium.common.exceptions import NoSuchElementException
-
-        driver = webdriver.Firefox()
+        
+        opts = FirefoxOptions()
+        opts.add_argument("--headless")
+        driver = webdriver.Firefox(firefox_options=opts)
         driver.get(
             "https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/oauth2/authorize?"
             "response_type=code&"
