@@ -198,7 +198,7 @@ class TestGen3DataAccess(unittest.TestCase):
         )
 
         if driver.title != 'Sign In - NIH Login':
-            print(f'Warning, the website title message has changed bro.')
+            print(f'Warning, the website title message has changed bro: {driver.title}')
 
         username_box = driver.find_element_by_name("USER")
         username_box.clear()
