@@ -101,4 +101,4 @@ scheduled_tests:
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
     - export PATH="$PATH:/opt/webdriver"
-    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
+    - BDCAT_STAGE=prod test/test_basic_submission.py
