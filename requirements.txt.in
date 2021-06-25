@@ -4,3 +4,4 @@ gen3==2.2.3
 requests==2.24.0
 terra-notebook-utils==0.8.1
 flake8==3.8.3
+selenium==3.141.0
