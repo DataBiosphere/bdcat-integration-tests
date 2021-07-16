@@ -27,7 +27,7 @@ staging:
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
     - export PATH="$PATH:/opt/webdriver"
-    - unset GOOGLE_APPLICATION_CREDENTIALS; export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
+    - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
   only:
     - master
@@ -42,7 +42,7 @@ version_check:
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
-    - unset GOOGLE_APPLICATION_CREDENTIALS; export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
+    - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_version_check.py
   only:
     - master
@@ -87,7 +87,7 @@ dev-staging:
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
     - make lint
     - export PATH="$PATH:/opt/webdriver"
-    - unset GOOGLE_APPLICATION_CREDENTIALS; export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
+    - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
   except:
     - schedules
