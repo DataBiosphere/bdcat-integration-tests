@@ -258,8 +258,6 @@ class TestGen3DataAccess(unittest.TestCase):
 
         self.assertEquals(acl_restriction_found, True)
 
-
-
     # @staging_only
     # def test_import_drs_from_gen3(self):
     #     # file is ~1gb, so only download the first byte to check for access
