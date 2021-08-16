@@ -238,7 +238,7 @@ class TestGen3DataAccess(unittest.TestCase):
         # first try to download the file and we should be denied
         # only downloads the first byte even if successful to keep it short
         response = import_drs_from_gen3('drs://dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc', raise_for_status=False)
-        self.assertEquals(response.status_code, 401)
+        self.assertEqual(response.status_code, 401)
 
         # now check the ACL to make sure we shouldn't be accessing this file,
         # there are many phs ids associated with the RAS user BICommonUser, and we choose only phs id 000888 (randomly)
@@ -256,7 +256,7 @@ class TestGen3DataAccess(unittest.TestCase):
                 acl_restriction_found = True
                 break
 
-        self.assertEquals(acl_restriction_found, True)
+        self.assertEqual(acl_restriction_found, True)
 
     # @staging_only
     # def test_import_drs_from_gen3(self):
