@@ -106,7 +106,6 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Dockstore Check Workflow Not Seen'):
             self.assertFalse(wf_seen_in_terra)
 
-    @staging_only
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
         response = run_workflow()
@@ -120,12 +119,15 @@ class TestGen3DataAccess(unittest.TestCase):
 
         # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
         # also configurable manually via MD5SUM_TEST_TIMEOUT if held in a pending state
-        timeout = twenty_minutes = int(os.environ.get('MD5SUM_TEST_TIMEOUT', 20 * 60))
+        timeout = twenty_minutes = int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
         while status != 'Done':
             response = check_workflow_status(submission_id=submission_id)
             time.sleep(20)
             timeout -= 20
             status = response['status']
+            if response['workflows'][0]['status'] == "Failed":
+                raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
+
             print(f"md5sum workflow state is: {response['workflows'][0]['status']}.  Checking again in 20 seconds.")
             if timeout < 0:
                 print(json.dumps(response, indent=4))
