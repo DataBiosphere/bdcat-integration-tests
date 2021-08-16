@@ -237,7 +237,7 @@ class TestGen3DataAccess(unittest.TestCase):
     def test_import_drs_from_gen3(self):
         # first try to download the file and we should be denied
         # only downloads the first byte even if successful to keep it short
-        response = import_drs_from_gen3('dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc', raise_for_status=False)
+        response = import_drs_from_gen3('drs://dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc', raise_for_status=False)
         self.assertEquals(response.status_code, 401)
 
         # now check the ACL to make sure we shouldn't be accessing this file,
@@ -252,7 +252,7 @@ class TestGen3DataAccess(unittest.TestCase):
 
         acl_restriction_found = False
         for record in response['records']:
-            if response['records'][record]['did'] == 'dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc':
+            if record['did'] == 'dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc':
                 acl_restriction_found = True
                 break
 
