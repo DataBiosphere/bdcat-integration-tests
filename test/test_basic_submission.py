@@ -235,9 +235,30 @@ class TestGen3DataAccess(unittest.TestCase):
 
     @staging_only
     def test_import_drs_from_gen3(self):
-        # file is ~1gb, so only download the first byte to check for access
+        # first try to download the file and we should be denied
+        # only downloads the first byte even if successful to keep it short
         response = import_drs_from_gen3('dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc', raise_for_status=False)
         self.assertEquals(response.status_code, 401)
+
+        # now check the ACL to make sure we shouldn't be accessing this file,
+        # there are many phs ids associated with the RAS user BICommonUser, and we choose only phs id 000888 (randomly)
+        response = requests.get('https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/index/index?negate_params={"acl":["*","admin","topmed","phs000888"]}')
+        response = response.json()
+
+        # # all ids associated with BICommonUser0; written here for posterity, we only check one
+        # ras_user_phs_ids = ["phs000888", "phs000681", "phs001014", "phs001095", "phs001215", "phs001544",
+        #                     "phs001395", "phs000169", "phs000636", "phs000820", "phs000971", "phs000984",
+        #                     "phs000292", "phs000997", "phs000944", "phs000304", "phs000209", "phs000538", "phs000353"]
+
+        acl_restriction_found = False
+        for record in response['records']:
+            if response['records'][record]['did'] == 'dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc':
+                acl_restriction_found = True
+                break
+
+        self.assertEquals(acl_restriction_found, True)
+
+
 
     # @staging_only
     # def test_import_drs_from_gen3(self):
