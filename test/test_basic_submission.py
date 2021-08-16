@@ -236,7 +236,7 @@ class TestGen3DataAccess(unittest.TestCase):
     @staging_only
     def test_import_drs_from_gen3(self):
         # file is ~1gb, so only download the first byte to check for access
-        response = import_drs_from_gen3('drs://dg.712C/95dc0845-d895-489f-aaf8-583a676037f7', raise_for_status=False)
+        response = import_drs_from_gen3('dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc', raise_for_status=False)
         self.assertEquals(response.status_code, 401)
 
     # @staging_only
