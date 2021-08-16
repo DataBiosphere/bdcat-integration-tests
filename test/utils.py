@@ -284,7 +284,7 @@ def add_requester_pays_arg_to_url(url):
 
 
 @retry(error_codes={500, 502, 503, 504})
-def import_drs_from_gen3(guid: str) -> requests.Response:
+def import_drs_from_gen3(guid: str, raise_for_status=True) -> requests.Response:
     """
     Import the first byte of a DRS URI using gen3.
 
@@ -320,9 +320,13 @@ def import_drs_from_gen3(guid: str) -> requests.Response:
         if gs_resp.ok:
             return gs_resp
         else:
-            print(f'Gen3 url call succeeded for: {gen3_endpoint} with: {gen3_resp.json()} ...\n'
-                  f'BUT the subsequent google called failed: {gs_endpoint_w_requester_pays} with: {gs_resp.content}')
-            gs_resp.raise_for_status()
+            if raise_for_status:
+                print(f'Gen3 url call succeeded for: {gen3_endpoint} with: {gen3_resp.json()} ...\n'
+                      f'BUT the subsequent google called failed: {gs_endpoint_w_requester_pays} with: {gs_resp.content}')
+                gs_resp.raise_for_status()
+            return gs_resp
     else:
-        print(f'Gen3 url call failed for: {gen3_endpoint} with: {gen3_resp.content}')
-        gen3_resp.raise_for_status()
+        if raise_for_status:
+            print(f'Gen3 url call failed for: {gen3_endpoint} with: {gen3_resp.content}')
+            gen3_resp.raise_for_status()
+        return gen3_resp
