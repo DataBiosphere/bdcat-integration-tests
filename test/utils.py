@@ -105,6 +105,8 @@ def run_workflow():
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
 
+    # staging input: https://gen3.biodatacatalyst.nhlbi.nih.gov/files/dg.712C/fa640b0e-9779-452f-99a6-16d833d15bd0
+    # md5sum: e87ecd9c771524dcc646c8baf6f8d3e2
     data = {
         "methodConfigurationNamespace": "drs_tests",
         "methodConfigurationName": "md5sum",
@@ -115,6 +117,11 @@ def run_workflow():
         "deleteIntermediateOutputFiles": True,
         "workflowFailureMode": "NoNewCalls"
     }
+    if STAGE == 'prod':
+        # prod input: https://gen3.biodatacatalyst.nhlbi.nih.gov/files/dg.4503/d52a7cc6-67a5-4bd6-9041-a5dad3f3650a
+        # md5sum: e87ecd9c771524dcc646c8baf6f8d3e2
+        del data["entityType"]
+        del data["entityName"]
 
     resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
     resp.raise_for_status()
