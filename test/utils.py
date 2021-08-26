@@ -4,6 +4,8 @@ import requests
 import hashlib
 import functools
 import time
+import jwt
+import base64
 
 from typing import List, Set, Optional
 from requests.exceptions import HTTPError
@@ -281,6 +283,25 @@ def pfb_job_status_in_terra(workspace, job_id):
 def add_requester_pays_arg_to_url(url):
     endpoint, args = url.split('?', 1)
     return f'{endpoint}?userProject={BILLING_PROJECT}&{args}'
+
+
+@retry(error_codes={500, 502, 503, 504})
+def import_drs_with_direct_gen3_access_token(guid: str) -> requests.Response:
+    if guid.startswith('drs://'):
+        guid = guid[len('drs://'):]
+    else:
+        raise ValueError(f'DRS URI is missing the "drs://" schema.  Please specify a DRS URI, not: {guid}')
+
+    gen3_api_key = base64.decodebytes(os.environ['GEN3_API_KEY'].encode('utf-8')).decode('utf-8')
+
+    decoded_api_key = jwt.decode(gen3_api_key, verify=False)
+    hostname = decoded_api_key['iss'].replace('/user', '')
+
+    response = requests.post(f'{hostname}/user/credentials/api/access_token',
+                             data={"api_key": gen3_api_key, "Content-Type": "application/json"}).json()
+    access_token = response['access_token']
+    return requests.head(f'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{guid}',
+                         headers={"Authorization": f"Bearer {access_token}"})
 
 
 @retry(error_codes={500, 502, 503, 504})
