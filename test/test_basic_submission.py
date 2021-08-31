@@ -9,6 +9,7 @@ import requests
 import datetime
 import warnings
 import base64
+import random
 
 import terra_notebook_utils as tnu
 
@@ -27,7 +28,7 @@ from test.utils import (run_workflow,
                         check_workflow_presence_in_terra_workspace,
                         delete_workflow_presence_in_terra_workspace,
                         check_workflow_status,
-                        import_drs_from_gen3,
+                        import_drs_with_direct_gen3_access_token,
                         BILLING_PROJECT,
                         STAGE)
 
@@ -234,6 +235,24 @@ class TestGen3DataAccess(unittest.TestCase):
             except NoSuchElementException:
                 time.sleep(2)
                 timeout -= 2
+
+    @staging_only
+    def test_import_drs_from_gen3(self):
+        # # all ids associated with BICommonUser0; this should respond with all DRS URIs we don't have access to
+        response = requests.get(
+            'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/index/index?'
+            'negate_params={"acl":["*","admin","topmed",'
+            '"phs000888", "phs000681", "phs001014", "phs001095", "phs001215", '
+            '"phs001544", "phs001395", "phs000169", "phs000636", "phs000820", '
+            '"phs000971", "phs000984", "phs000292", "phs000997", "phs000944", '
+            '"phs000304", "phs000209", "phs000538", "phs000353"]}')
+        random_restricted_record = random.choice(response.json()['records'])
+        drs_uri = random_restricted_record['did']
+
+        # first try to download the file and we should be denied
+        # only downloads the first byte even if successful to keep it short
+        response = import_drs_with_direct_gen3_access_token(f'drs://{drs_uri}')
+        self.assertEqual(response.status_code, 401)  # not a 403?
 
     # @staging_only
     # def test_import_drs_from_gen3(self):

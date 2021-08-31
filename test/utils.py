@@ -4,6 +4,8 @@ import requests
 import hashlib
 import functools
 import time
+import jwt
+import base64
 
 from typing import List, Set, Optional
 from requests.exceptions import HTTPError
@@ -291,7 +293,26 @@ def add_requester_pays_arg_to_url(url):
 
 
 @retry(error_codes={500, 502, 503, 504})
-def import_drs_from_gen3(guid: str) -> requests.Response:
+def import_drs_with_direct_gen3_access_token(guid: str) -> requests.Response:
+    if guid.startswith('drs://'):
+        guid = guid[len('drs://'):]
+    else:
+        raise ValueError(f'DRS URI is missing the "drs://" schema.  Please specify a DRS URI, not: {guid}')
+
+    gen3_api_key = base64.decodebytes(os.environ['GEN3_API_KEY'].encode('utf-8')).decode('utf-8')
+
+    decoded_api_key = jwt.decode(gen3_api_key, verify=False)
+    hostname = decoded_api_key['iss'].replace('/user', '')
+
+    response = requests.post(f'{hostname}/user/credentials/api/access_token',
+                             data={"api_key": gen3_api_key, "Content-Type": "application/json"}).json()
+    access_token = response['access_token']
+    return requests.head(f'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{guid}',
+                         headers={"Authorization": f"Bearer {access_token}"})
+
+
+@retry(error_codes={500, 502, 503, 504})
+def import_drs_from_gen3(guid: str, raise_for_status=True) -> requests.Response:
     """
     Import the first byte of a DRS URI using gen3.
 
@@ -327,9 +348,13 @@ def import_drs_from_gen3(guid: str) -> requests.Response:
         if gs_resp.ok:
             return gs_resp
         else:
-            print(f'Gen3 url call succeeded for: {gen3_endpoint} with: {gen3_resp.json()} ...\n'
-                  f'BUT the subsequent google called failed: {gs_endpoint_w_requester_pays} with: {gs_resp.content}')
-            gs_resp.raise_for_status()
+            if raise_for_status:
+                print(f'Gen3 url call succeeded for: {gen3_endpoint} with: {gen3_resp.json()} ...\n'
+                      f'BUT the subsequent google called failed: {gs_endpoint_w_requester_pays} with: {gs_resp.content}')
+                gs_resp.raise_for_status()
+            return gs_resp
     else:
-        print(f'Gen3 url call failed for: {gen3_endpoint} with: {gen3_resp.content}')
-        gen3_resp.raise_for_status()
+        if raise_for_status:
+            print(f'Gen3 url call failed for: {gen3_endpoint} with: {gen3_resp.content}')
+            gen3_resp.raise_for_status()
+        return gen3_resp
