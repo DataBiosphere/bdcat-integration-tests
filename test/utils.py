@@ -259,9 +259,8 @@ def import_pfb(workspace, pfb_file):
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
-    #data = dict(url='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
+    # data = dict(url='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
     data = dict(url=pfb_file)
-
 
     resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
 

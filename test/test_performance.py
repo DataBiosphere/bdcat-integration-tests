@@ -12,7 +12,7 @@ from test.utils import (create_terra_workspace,
 
 logger = logging.getLogger(__name__)
 
-#TODO: this is the old normal sized file, but we can just test with it and then use the bigger one
+# TODO: this is the old normal sized file, but we can just test with it and then use the bigger one
 large_pfb = 'https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro'
 
 
@@ -32,7 +32,7 @@ class TestPerformance(unittest.TestCase):
 
         with self.subTest('Check on the import static pfb job status.'):
             response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
-# this should take < ??????????
+            # this should take < ??????????
             while response['status'] in ['Translating', 'ReadyForUpsert', 'Upserting', 'Pending']:
                 time.sleep(2)
                 response = pfb_job_status_in_terra(workspace=workspace_name, job_id=response['jobId'])
