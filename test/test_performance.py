@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # TODO: this is the old normal sized file, but we can just test with it and then use the bigger one
 large_pfb = 'https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro'
 
+
 class TestPerformance(unittest.TestCase):
     def test_large_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
