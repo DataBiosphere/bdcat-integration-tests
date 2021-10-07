@@ -107,7 +107,12 @@ dev-perf:
     - export PATH="$PATH:/opt/webdriver"
     - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_performance.py
-
+  except:
+    - schedules
+    - prod
+    - staging
+    - master
+    
 scheduled_tests:
   only:
     - schedules
