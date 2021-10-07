@@ -5,7 +5,7 @@ import json
 import time
 import datetime
 
-from test.utils import (create_terra_workspace,
+from utils import (create_terra_workspace,
                         delete_terra_workspace,
                         pfb_job_status_in_terra,
                         import_pfb)
