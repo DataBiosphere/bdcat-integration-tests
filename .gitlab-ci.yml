@@ -104,18 +104,13 @@ dev-perf:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    # - make lint
     - export PATH="$PATH:/opt/webdriver"
     - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_performance.py
-  # only:
-   # - schedules
-   # - staging
-   # - master
-    rules:
-      - if: '$perfOnly == "true"'
-        when: always
-      when: never
+  rules:
+   - if: '$perfOnly == "true"'
+    when: always
+  when: never
 
 scheduled_tests:
   only:
