@@ -10,16 +10,20 @@ from test.utils import (create_terra_workspace,
                         pfb_job_status_in_terra,
                         import_pfb)
 
+print("blargie1")
+
 logger = logging.getLogger(__name__)
+
+print("blargie2")
 
 # TODO: this is the old normal sized file, but we can just test with it and then use the bigger one
 large_pfb = 'https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro'
 
+print("blargie3")
 
 class TestPerformance(unittest.TestCase):
     def test_large_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
-        print("blargie")
         workspace_name = f'drs_test_{time_stamp}_delete_me'
 
         with self.subTest('Create a terra workspace.'):
