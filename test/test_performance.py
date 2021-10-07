@@ -6,9 +6,9 @@ import time
 import datetime
 
 from utils import (create_terra_workspace,
-                        delete_terra_workspace,
-                        pfb_job_status_in_terra,
-                        import_pfb)
+                    delete_terra_workspace,
+                    pfb_job_status_in_terra,
+                    import_pfb)
 
 logger = logging.getLogger(__name__)
 
