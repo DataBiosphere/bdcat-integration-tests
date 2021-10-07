@@ -3,6 +3,9 @@ image: ubuntu:18.04
 stages:
   - test
 
+variables:
+  perfOnly: 'true'
+
 before_script:
   - date && date -u
   - apt-get update && apt-get install -y python3.8 python3.8-dev python3-pip python-pip virtualenv git apt-transport-https ca-certificates gnupg curl software-properties-common firefox wget
@@ -101,7 +104,7 @@ dev-perf:
     - source environment
     - virtualenv -p python3.8 venv && . venv/bin/activate
     - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
+    #- make lint
     - export PATH="$PATH:/opt/webdriver"
     - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_performance.py
@@ -109,6 +112,10 @@ dev-perf:
    # - schedules
    # - staging
    # - master
+    rules:
+      - if: '$perfOnly == "true"'
+        when: always
+      when: never
 
 scheduled_tests:
   only:
