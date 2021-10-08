@@ -76,12 +76,13 @@ dev-prod:
     - make lint
     - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=prod test/test_basic_submission.py
-  except:
-    - schedules
-    - prod
-    - staging
-    - master
-    - dev-perf
+#  except:
+#    - schedules
+#    - prod
+#    - staging
+#    - master
+  rules:
+    - when: never
 
 dev-staging:
   stage: test
@@ -93,11 +94,13 @@ dev-staging:
     - export PATH="$PATH:/opt/webdriver"
     - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
-  except:
-    - schedules
-    - prod
-    - staging
-    - master
+#  except:
+#    - schedules
+#    - prod
+#    - staging
+#    - master
+  rules:
+    - when: never
 
 dev-perf:
   stage: test
