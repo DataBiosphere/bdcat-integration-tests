@@ -99,6 +99,8 @@ dev-staging:
 #    - prod
 #    - staging
 #    - master
+  rules:
+    - when: never
 
 dev-perf:
   stage: test
