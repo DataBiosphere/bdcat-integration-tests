@@ -8,6 +8,7 @@ import os
 import sys
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
+print("This is the package root{0}".format(pkg_root))
 sys.path.insert(0, pkg_root)  # noqa
 
 from .utils import create_terra_workspace, delete_terra_workspace, pfb_job_status_in_terra, import_pfb
