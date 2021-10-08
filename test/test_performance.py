@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 import logging
+import sys
 import unittest
+import os
 import json
 import time
+import requests
 import datetime
-import os
-import sys
+import warnings
+import base64
+
+import terra_notebook_utils as tnu
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 print("This is the package root{0}".format(pkg_root))
@@ -34,6 +39,30 @@ large_pfb = 'https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06
 
 
 class TestPerformance(unittest.TestCase):
+    def setUp(self):
+        # Stolen shamelessly: https://github.com/DataBiosphere/terra-notebook-utils/pull/59
+        # Suppress the annoying google gcloud _CLOUD_SDK_CREDENTIALS_WARNING warnings
+        warnings.filterwarnings("ignore", "Your application has authenticated using end user credentials")
+        # Suppress unclosed socket warnings
+        warnings.simplefilter("ignore", ResourceWarning)
+
+    @classmethod
+    def setUpClass(cls):
+        gcloud_cred_dir = os.path.expanduser('~/.config/gcloud')
+        if not os.path.exists(gcloud_cred_dir):
+            os.makedirs(gcloud_cred_dir, exist_ok=True)
+        with open(os.path.expanduser('~/.config/gcloud/application_default_credentials.json'), 'w') as f:
+            f.write(base64.decodebytes(os.environ['TEST_MULE_CREDS'].encode('utf-8')).decode('utf-8'))
+        print(f'Terra [{STAGE}] Health Status:\n\n{json.dumps(check_terra_health(), indent=4)}')
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        try:
+            delete_workflow_presence_in_terra_workspace()
+        except:  # noqa
+            pass
+
+    @retry(errors={requests.exceptions.HTTPError}, error_codes={409})
     def test_large_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
         workspace_name = f'drs_test_{time_stamp}_delete_me'
