@@ -42,9 +42,9 @@ version_check:
     - make lint
     - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_version_check.py
-  except:
-    - schedules
-    - prod
+  only:
+    - master
+    - staging
 
 prod:
   stage: test
