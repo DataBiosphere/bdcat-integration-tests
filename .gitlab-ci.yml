@@ -33,7 +33,7 @@ staging:
     - export BDCAT_STAGE=staging
     - export TERRA_DEPLOYMENT_ENV=alpha
     - test/test_basic_submission.py
-    - test/test_basic_seven_bridges.py
+    - test/test_sevenbridges.py
   only:
     - master
     - staging
@@ -69,7 +69,7 @@ prod:
     - export PATH="$PATH:/opt/webdriver"
     - export BDCAT_STAGE=prod
     - test/test_basic_submission.py
-    - test/test_basic_seven_bridges.py
+    - test/test_sevenbridges.py
   only:
     - prod
   except:
@@ -85,7 +85,7 @@ dev-prod:
     - export PATH="$PATH:/opt/webdriver"
     - export BDCAT_STAGE=prod
     - test/test_basic_submission.py
-    - test/test_basic_seven_bridges.py
+    - test/test_sevenbridges.py
   except:
     - schedules
     - prod
@@ -106,7 +106,7 @@ dev-staging:
     - export BDCAT_STAGE=staging
     - export TERRA_DEPLOYMENT_ENV=alpha
     - test/test_basic_submission.py
-    - test/test_basic_seven_bridges.py
+    - test/test_sevenbridges.py
   except:
     - schedules
     - prod
