@@ -34,11 +34,9 @@ staging:
     - export TERRA_DEPLOYMENT_ENV=alpha
     - test/test_basic_submission.py
     - test/test_sevenbridges.py
-  only:
-    - master
-    - staging
   except:
     - schedules
+    - prod
 
 version_check:
   stage: test
@@ -53,11 +51,9 @@ version_check:
     - export BDCAT_STAGE=staging
     - export TERRA_DEPLOYMENT_ENV=alpha
     - test/test_version_check.py
-  only:
-    - master
-    - staging
   except:
     - schedules
+    - prod
 
 prod:
   stage: test
@@ -70,56 +66,6 @@ prod:
     - export BDCAT_STAGE=prod
     - test/test_basic_submission.py
     - test/test_sevenbridges.py
-  only:
-    - prod
   except:
-    - schedules
-
-dev-prod:
-  stage: test
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - export BDCAT_STAGE=prod
-    - test/test_basic_submission.py
-    - test/test_sevenbridges.py
-  except:
-    - schedules
-    - prod
-    - staging
     - master
-
-dev-staging:
-  stage: test
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - export GOOGLE_PROJECT_NAME=firecloud-cgl
-    - export WORKSPACE_NAME=terra-notebook-utils-tests
-    - export GOOGLE_PROJECT_ID=drs-billing-project
-    - export BDCAT_STAGE=staging
-    - export TERRA_DEPLOYMENT_ENV=alpha
-    - test/test_basic_submission.py
-    - test/test_sevenbridges.py
-  except:
-    - schedules
-    - prod
     - staging
-    - master
-
-scheduled_tests:
-  only:
-    - schedules
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - BDCAT_STAGE=prod test/test_basic_submission.py
