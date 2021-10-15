@@ -56,4 +56,5 @@ prod:
     - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=prod test/test_basic_submission.py
   except:
+    - master
     - staging
