@@ -29,11 +29,9 @@ staging:
     - export PATH="$PATH:/opt/webdriver"
     - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
-  only:
-    - master
-    - staging
   except:
     - schedules
+    - prod
 
 version_check:
   stage: test
@@ -44,11 +42,9 @@ version_check:
     - make lint
     - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
     - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_version_check.py
-  only:
-    - master
-    - staging
   except:
     - schedules
+    - prod
 
 prod:
   stage: test
@@ -59,49 +55,5 @@ prod:
     - make lint
     - export PATH="$PATH:/opt/webdriver"
     - BDCAT_STAGE=prod test/test_basic_submission.py
-  only:
-    - prod
   except:
-    - schedules
-
-dev-prod:
-  stage: test
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - BDCAT_STAGE=prod test/test_basic_submission.py
-  except:
-    - schedules
-    - prod
     - staging
-    - master
-
-dev-staging:
-  stage: test
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
-    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
-  except:
-    - schedules
-    - prod
-    - staging
-    - master
-
-scheduled_tests:
-  only:
-    - schedules
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - BDCAT_STAGE=prod test/test_basic_submission.py
