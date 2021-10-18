@@ -63,14 +63,16 @@ def retry(intervals: Optional[List] = None,
     """
     if intervals is None:
         intervals = [1, 1, 2, 4, 8]
-    if error_codes and errors is None:
+    if error_codes is None:
+        error_codes = set()
+    if errors is None:
+        errors = set()
+    if error_codes and not errors:
         errors = {HTTPError}
 
     def decorate(func):
         @functools.wraps(func)
         def call(*args, **kwargs):
-            if error_codes:
-                errors.add(HTTPError)
             while True:
                 try:
                     return func(*args, **kwargs)
