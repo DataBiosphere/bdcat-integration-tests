@@ -39,7 +39,7 @@ def retry(intervals: Optional[List] = None,
     Cases to consider:
 
         error_codes ={} && errors={}
-            Don't retry on anything.
+            Retry on any Exception.
 
         error_codes ={500} && errors={}
         error_codes ={500} && errors={HTTPError}
@@ -55,7 +55,7 @@ def retry(intervals: Optional[List] = None,
         Defaults to retrying with the following exponential backoff before failing:
             1s, 1s, 2s, 4s, 8s
 
-    :param errors: Exceptions to catch and retry on.  Defaults to: {HTTPError}.
+    :param errors: Exceptions to catch and retry on.
 
     :param error_codes: HTTPError return codes to retry on.  The default is an empty set.
 
@@ -65,8 +65,8 @@ def retry(intervals: Optional[List] = None,
         intervals = [1, 1, 2, 4, 8]
     if error_codes is None:
         error_codes = set()
-    if errors is None:
-        errors = set()
+    if not error_codes and not errors:
+        errors = {Exception}
     if error_codes and not errors:
         errors = {HTTPError}
 
