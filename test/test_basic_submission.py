@@ -238,7 +238,14 @@ class TestGen3DataAccess(unittest.TestCase):
 
     @staging_only
     def test_import_drs_from_gen3(self):
-        # # all ids associated with BICommonUser0; this should respond with all DRS URIs we don't have access to
+        # TODO: There isn't a good way around these hard-coded public URIs right now.
+        public_uris = ['drs://dg.712C/60df2552-3d67-4f21-b637-5b53684fe444',
+                       'drs://dg.712C/a83118b2-8fdc-42de-9de2-5ddb27efb8eb',
+                       'drs://dg.712C/a84c1bcf-1975-402f-a973-ff7a307a2e90',
+                       'drs://dg.712C/b7a10338-6fb6-4201-adde-0ee933e069bc',
+                       'drs://dg.712C/2d9692bb-2050-4742-b7ae-42a83de6129e',
+                       'drs://dg.712C/39474412-fc6d-4dbc-81c2-176db2403130']
+
         response = requests.get(
             'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/index/index?'
             'negate_params={"acl":["*","admin","topmed",'
@@ -246,8 +253,8 @@ class TestGen3DataAccess(unittest.TestCase):
             '"phs001544", "phs001395", "phs000169", "phs000636", "phs000820", '
             '"phs000971", "phs000984", "phs000292", "phs000997", "phs000944", '
             '"phs000304", "phs000209", "phs000538", "phs000353"]}')
-        random_restricted_record = random.choice(response.json()['records'])
-        drs_uri = random_restricted_record['did']
+        restricted_records = [r['did'] for r in response.json()['records'] if r['did'] not in public_uris]
+        drs_uri = random.choice(restricted_records)
 
         # first try to download the file and we should be denied
         # only downloads the first byte even if successful to keep it short
