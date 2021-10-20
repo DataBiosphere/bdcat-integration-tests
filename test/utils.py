@@ -8,7 +8,7 @@ import jwt
 import base64
 
 from typing import List, Set, Optional
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ConnectionError
 
 from terra_notebook_utils import gs
 
@@ -39,7 +39,7 @@ def retry(intervals: Optional[List] = None,
     Cases to consider:
 
         error_codes ={} && errors={}
-            Don't retry on anything.
+            Retry on any Exception.
 
         error_codes ={500} && errors={}
         error_codes ={500} && errors={HTTPError}
@@ -55,7 +55,7 @@ def retry(intervals: Optional[List] = None,
         Defaults to retrying with the following exponential backoff before failing:
             1s, 1s, 2s, 4s, 8s
 
-    :param errors: Exceptions to catch and retry on.  Defaults to: {HTTPError}.
+    :param errors: Exceptions to catch and retry on.
 
     :param error_codes: HTTPError return codes to retry on.  The default is an empty set.
 
@@ -63,16 +63,16 @@ def retry(intervals: Optional[List] = None,
     """
     if intervals is None:
         intervals = [1, 1, 2, 4, 8]
-    if errors is None:
+    if error_codes is None:
+        error_codes = set()
+    if not error_codes and not errors:
+        errors = {Exception}
+    if error_codes and not errors:
         errors = {HTTPError}
-    if errors is None:
-        error_codes = {}
 
     def decorate(func):
         @functools.wraps(func)
         def call(*args, **kwargs):
-            if error_codes:
-                errors.add(HTTPError)
             while True:
                 try:
                     return func(*args, **kwargs)
@@ -97,7 +97,7 @@ def md5sum(file_name):
     return hash.hexdigest()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def run_workflow():
     workspace = 'DRS-Test-Workspace'
     endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/submissions'
@@ -130,7 +130,7 @@ def run_workflow():
     return resp.json()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def import_dockstore_wf_into_terra():
     workspace = 'BDC_Dockstore_Import_Test'
     endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/methodconfigs'
@@ -161,7 +161,7 @@ def import_dockstore_wf_into_terra():
     return resp.json()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def check_workflow_presence_in_terra_workspace():
     workspace = 'BDC_Dockstore_Import_Test'
     endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/methodconfigs?allRepos=true'
@@ -175,7 +175,7 @@ def check_workflow_presence_in_terra_workspace():
     return resp.json()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def delete_workflow_presence_in_terra_workspace():
     workspace = 'BDC_Dockstore_Import_Test'
     workflow = 'UM_aligner_wdl'
@@ -190,7 +190,7 @@ def delete_workflow_presence_in_terra_workspace():
     return {}
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def check_workflow_status(submission_id):
     workspace = 'DRS-Test-Workspace'
     endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/submissions/{submission_id}'
@@ -204,7 +204,7 @@ def check_workflow_status(submission_id):
     return resp.json()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def check_terra_health():
     # note: the same endpoint seems to be at: https://api.alpha.firecloud.org/status
     endpoint = f'{ORC_DOMAIN}/status'
@@ -214,7 +214,7 @@ def check_terra_health():
     return resp.json()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def create_terra_workspace(workspace):
     endpoint = f'{RAWLS_DOMAIN}/api/workspaces'
 
@@ -238,7 +238,7 @@ def create_terra_workspace(workspace):
         resp.raise_for_status()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def delete_terra_workspace(workspace):
     endpoint = f'{RAWLS_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}'
 
@@ -251,7 +251,7 @@ def delete_terra_workspace(workspace):
     return resp
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def import_pfb(workspace):
     endpoint = f'{ORC_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/importPFB'
 
@@ -270,7 +270,7 @@ def import_pfb(workspace):
         resp.raise_for_status()
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def pfb_job_status_in_terra(workspace, job_id):
     endpoint = f'{ORC_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/importPFB/{job_id}'
     token = gs.get_access_token()
@@ -292,7 +292,7 @@ def add_requester_pays_arg_to_url(url):
     return f'{endpoint}?userProject={BILLING_PROJECT}&{args}'
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def import_drs_with_direct_gen3_access_token(guid: str) -> requests.Response:
     if guid.startswith('drs://'):
         guid = guid[len('drs://'):]
@@ -311,7 +311,7 @@ def import_drs_with_direct_gen3_access_token(guid: str) -> requests.Response:
                          headers={"Authorization": f"Bearer {access_token}"})
 
 
-@retry(error_codes={500, 502, 503, 504})
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
 def import_drs_from_gen3(guid: str, raise_for_status=True) -> requests.Response:
     """
     Import the first byte of a DRS URI using gen3.
