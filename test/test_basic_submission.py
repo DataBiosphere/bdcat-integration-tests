@@ -259,8 +259,7 @@ class TestGen3DataAccess(unittest.TestCase):
 
         # first try to download the file and we should be denied
         # only downloads the first byte even if successful to keep it short
-        drs_uri = 'drs://dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc'
-        response = import_drs_with_direct_gen3_access_token(f'drs://{drs_uri}')
+        response = import_drs_with_direct_gen3_access_token(f'drs://dg.712C/01229405-6ce4-4ad7-aa04-19124afadebc')
         self.assertEqual(response.status_code, 401)  # not a 403?
 
     # @staging_only
