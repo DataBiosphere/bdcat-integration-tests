@@ -303,12 +303,16 @@ def import_drs_with_direct_gen3_access_token(guid: str) -> requests.Response:
 
     decoded_api_key = jwt.decode(gen3_api_key, verify=False)
     hostname = decoded_api_key['iss'].replace('/user', '')
-
-    response = requests.post(f'{hostname}/user/credentials/api/access_token',
-                             data={"api_key": gen3_api_key, "Content-Type": "application/json"}).json()
-    access_token = response['access_token']
+    access_token = get_gen3_access_token(hostname, gen3_api_key)
     return requests.head(f'https://staging.gen3.biodatacatalyst.nhlbi.nih.gov/user/data/download/{guid}',
                          headers={"Authorization": f"Bearer {access_token}"})
+
+
+@retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError, json.decoder.JSONDecodeError})
+def get_gen3_access_token(hostname: str, gen3_api_key: str):
+    response = requests.post(f'{hostname}/user/credentials/api/access_token',
+                             data={"api_key": gen3_api_key, "Content-Type": "application/json"})
+    return response.json()['access_token']
 
 
 @retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
