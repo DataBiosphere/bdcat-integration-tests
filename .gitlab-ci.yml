@@ -1,4 +1,4 @@
-image: images.sbgenomics.com/seven-bridges-qa/bdcat-integration-tests
+image: images.sbgenomics.com/seven-bridges-qa/bdcat-integration-tests:2021-10-22
 
 stages:
   - test

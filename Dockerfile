@@ -30,3 +30,6 @@ COPY requirements.txt /opt/.
 
 RUN /venv/bin/pip install -r /opt/requirements.txt \
     --no-cache-dir --disable-pip-version-check
+
+# For `make lint` to work without special considerations
+RUN ln -s /venv/bin/flake8 /usr/local/bin/flake8
