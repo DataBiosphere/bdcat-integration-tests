@@ -3,44 +3,43 @@ image: images.sbgenomics.com/seven-bridges-qa/bdcat-integration-tests:2021-10-22
 stages:
   - test
 
+variables:
+    GOOGLE_PROJECT_NAME: firecloud-cgl
+    WORKSPACE_NAME: terra-notebook-utils-tests
+    GOOGLE_PROJECT_ID: drs-billing-project
+    TERRA_DEPLOYMENT_ENV: alpha
+
+before_script:
+  - date && date -u
+  - source environment
+  - make lint
+
 after_script:
   - /venv/bin/python scripts/post_to_slack.py
 
-.prepare_job: &prepare_job
-  before_script:
-    - date && date -u
-    - source environment
-    - make lint
-    - export GOOGLE_PROJECT_NAME=firecloud-cgl
-    - export WORKSPACE_NAME=terra-notebook-utils-tests
-    - export GOOGLE_PROJECT_ID=drs-billing-project
-    - export TERRA_DEPLOYMENT_ENV=alpha
+.staging_job: &staging_job
+  stage: test
+  variables:
+    BDCAT_STAGE: staging
+  except:
+    - schedules
+    - prod
 
 staging__basic_submission:
-  stage: test
-  <<: *prepare_job
+  <<: *staging_job
   script:
-    - export BDCAT_STAGE=staging
     - /venv/bin/python test/test_basic_submission.py
-  except:
-    - schedules
-    - prod
 
 staging__version_check:
-  stage: test
-  <<: *prepare_job
+  <<: *staging_job
   script:
-    - export BDCAT_STAGE=staging
     - /venv/bin/python test/test_version_check.py
-  except:
-    - schedules
-    - prod
 
 prod__basic_submission:
   stage: test
-  <<: *prepare_job
+  variables:
+    BDCAT_STAGE: prod
   script:
-    - export BDCAT_STAGE=prod
     - /venv/bin/python test/test_basic_submission.py
   except:
     - master
