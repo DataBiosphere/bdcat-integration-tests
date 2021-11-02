@@ -3,11 +3,11 @@
 # To build this image, run:
 #
 #   docker login
-#   docker build . -t {docker_username}/{tag_key}:{tag_value}
-#   docker push {docker_username}/{tag_key}:{tag_value}
+#   docker build . -t quay.io/{docker_username}/{tag_key}:{tag_value}
+#   docker push quay.io/{docker_username}/{tag_key}:{tag_value}
 #
 # Notes:
-#  - docker.io has limits/throttling; gcr.io costs money; quay.io has neither of those pain points
+#  - docker.io has limits/throttling; gcr.io costs money; quay.io has neither
 FROM python:3.8
 COPY . /bdcat-integration-tests
 RUN pip install virtualenv

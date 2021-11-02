@@ -1,15 +1,15 @@
 # A Custom Docker Image for the Biodatacatalyst Integration Test CI Runner
 #
-# To build this image, run:
+# To build this image, (from the root directory of this repo) run:
 #
 #   docker login
-#   docker build . -t {docker_username}/{tag_key}:{tag_value}
+#   docker build -t={docker_username}/{tag_key}:{tag_value} -f=test/ci_image/Dockerfile .
 #   docker push {docker_username}/{tag_key}:{tag_value}
 #
 # For example:
 #
 #   docker login
-#   docker build . -t quay.io/biocat/bdcat-integration-tests:0.1
+#   docker build -t=quay.io/biocat/bdcat-integration-tests:0.1 -f=test/ci_image/Dockerfile .
 #   docker push quay.io/biocat/bdcat-integration-tests:0.1
 #
 # Notes:
