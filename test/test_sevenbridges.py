@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
+import os
+import sys
 import logging
 import unittest
+
+pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
+sys.path.insert(0, pkg_root)  # noqa
 
 from test.infra.testmode import staging_only, production_only, uses_sb_broker
 from test.infra import sb_broker
