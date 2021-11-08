@@ -1,4 +1,4 @@
-image: images.sbgenomics.com/seven-bridges-qa/bdcat-integration-tests:2021-10-22
+image: quay.io/biocat/bdcat-integration-tests:0.1
 
 stages:
   - test
@@ -7,7 +7,6 @@ variables:
     GOOGLE_PROJECT_NAME: firecloud-cgl
     WORKSPACE_NAME: terra-notebook-utils-tests
     GOOGLE_PROJECT_ID: drs-billing-project
-    TERRA_DEPLOYMENT_ENV: alpha
 
 before_script:
   - date && date -u
@@ -21,6 +20,7 @@ after_script:
   stage: test
   variables:
     BDCAT_STAGE: staging
+    TERRA_DEPLOYMENT_ENV: alpha
   except:
     - schedules
     - prod
