@@ -1,60 +1,46 @@
-image: ubuntu:18.04
+image: quay.io/biocat/bdcat-integration-tests:0.1
 
 stages:
   - test
 
+variables:
+    GOOGLE_PROJECT_NAME: firecloud-cgl
+    WORKSPACE_NAME: terra-notebook-utils-tests
+    GOOGLE_PROJECT_ID: drs-billing-project
+
 before_script:
   - date && date -u
-  - apt-get update && apt-get install -y python3.8 python3.8-dev python3-pip python-pip virtualenv git apt-transport-https ca-certificates gnupg curl software-properties-common firefox wget
-  - echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && apt-get update -y && apt-get install google-cloud-sdk -y
-  - apt-get -y upgrade
-  - wget https://github.com/mozilla/geckodriver/releases/download/v0.29.1/geckodriver-v0.29.1-linux64.tar.gz
-  - tar xzf geckodriver-v0.29.1-linux64.tar.gz
-  - rm geckodriver-v0.29.1-linux64.tar.gz
-  - mkdir /opt/webdriver
-  - mv geckodriver /opt/webdriver/geckodriver
-  - chmod 755 /opt/webdriver/geckodriver
+  - source environment
+  - make lint
 
 after_script:
-  - virtualenv -p python3.8 venv && . venv/bin/activate && pip install requests
-  - python scripts/post_to_slack.py
+  - /venv/bin/python scripts/post_to_slack.py
 
-staging:
+.staging_job: &staging_job
   stage: test
-  script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
-    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_basic_submission.py
+  variables:
+    BDCAT_STAGE: staging
+    TERRA_DEPLOYMENT_ENV: alpha
   except:
     - schedules
     - prod
 
-version_check:
-  stage: test
+staging__basic_submission:
+  <<: *staging_job
   script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export GOOGLE_PROJECT_NAME=firecloud-cgl; export WORKSPACE_NAME=terra-notebook-utils-tests; export GOOGLE_PROJECT_ID=drs-billing-project
-    - BDCAT_STAGE=staging TERRA_DEPLOYMENT_ENV=alpha test/test_version_check.py
-  except:
-    - schedules
-    - prod
+    - /venv/bin/python test/test_basic_submission.py
 
-prod:
-  stage: test
+staging__version_check:
+  <<: *staging_job
   script:
-    - source environment
-    - virtualenv -p python3.8 venv && . venv/bin/activate
-    - ./venv/bin/python -m pip install --no-cache-dir -r requirements.txt
-    - make lint
-    - export PATH="$PATH:/opt/webdriver"
-    - BDCAT_STAGE=prod test/test_basic_submission.py
+    - /venv/bin/python test/test_version_check.py
+
+prod__basic_submission:
+  stage: test
+  variables:
+    BDCAT_STAGE: prod
+  script:
+    - /venv/bin/python test/test_basic_submission.py
   except:
     - master
     - staging
