@@ -150,7 +150,7 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(response['createdBy'] == 'biodata.integration.test.mule@gmail.com')
 
         with self.subTest('Import static pfb into the terra workspace.'):
-#response = import_pfb(workspace=workspace_name)
+            # response = import_pfb(workspace=workspace_name)
             response = import_pfb(workspace=workspace_name,
                                   pfb_file='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
             self.assertTrue('jobId' in response)
@@ -168,7 +168,8 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Delete the terra workspace.'):
             response = delete_terra_workspace(workspace=workspace_name)
             if not response.ok:
-                raise RuntimeError(f'Could not delete the workspace "{workspace_name}": [{response.status_code}] {response}')
+                raise RuntimeError(
+                    f'Could not delete the workspace "{workspace_name}": [{response.status_code}] {response}')
             if response.status_code != 202:
                 logger.critical(f'Response {response.status_code} has changed: {response}')
             response = delete_terra_workspace(workspace=workspace_name)

@@ -252,7 +252,7 @@ def delete_terra_workspace(workspace):
 
 
 @retry(error_codes={500, 502, 503, 504}, errors={HTTPError, ConnectionError})
-#def import_pfb(workspace):
+# def import_pfb(workspace):
 def import_pfb(workspace, pfb_file):
     endpoint = f'{ORC_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/importPFB'
 
@@ -260,7 +260,7 @@ def import_pfb(workspace, pfb_file):
     headers = {'Content-Type': 'application/json',
                'Accept': 'application/json',
                'Authorization': f'Bearer {token}'}
-#data = dict(url='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
+    # data = dict(url='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
     data = dict(url=pfb_file)
 
     resp = requests.post(endpoint, headers=headers, data=json.dumps(data))
