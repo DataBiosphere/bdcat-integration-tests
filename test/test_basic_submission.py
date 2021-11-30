@@ -150,7 +150,6 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(response['createdBy'] == 'biodata.integration.test.mule@gmail.com')
 
         with self.subTest('Import static pfb into the terra workspace.'):
-            # response = import_pfb(workspace=workspace_name)
             response = import_pfb(workspace=workspace_name,
                                   pfb_file='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
             self.assertTrue('jobId' in response)
