@@ -120,21 +120,26 @@ class TestGen3DataAccess(unittest.TestCase):
 
         # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
         # also configurable manually via MD5SUM_TEST_TIMEOUT if held in a pending state
-        timeout = twenty_minutes = int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
-        while status != 'Done':
+        start = time.time()
+        deadline = start + int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
+        while True:
             response = check_workflow_status(submission_id=submission_id)
-            time.sleep(20)
-            timeout -= 20
             status = response['status']
-            if response['workflows'][0]['status'] == "Failed":
+            if status == 'Done':
+                break
+            elif response['workflows'][0]['status'] == "Failed":
                 raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
-
-            print(f"md5sum workflow state is: {response['workflows'][0]['status']}.  Checking again in 20 seconds.")
-            if timeout < 0:
-                print(json.dumps(response, indent=4))
-                raise RuntimeError('The md5sum workflow run timed out.  '
-                                   f'Expected 4 minutes, but took longer than '
-                                   f'{float(twenty_minutes - timeout) / 60.0} minutes.')
+            else:
+                now = time.time()
+                if now < deadline:
+                    print(f"md5sum workflow state is: {response['workflows'][0]['status']}. "
+                          f"Checking again in 20 seconds.")
+                    time.sleep(20)
+                else:
+                    print(json.dumps(response, indent=4))
+                    raise RuntimeError('The md5sum workflow run timed out.  '
+                                       f'Expected 4 minutes, but took longer than '
+                                       f'{float(start - now) / 60.0} minutes.')
 
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
             if response['workflows'][0]['status'] != "Succeeded":
