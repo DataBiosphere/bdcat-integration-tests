@@ -110,46 +110,53 @@ class TestGen3DataAccess(unittest.TestCase):
 
     def test_drs_workflow_in_terra(self):
         """This test runs md5sum in a fixed workspace using a drs url from gen3."""
+        response = run_workflow()
+        status = response['status']
+        with self.subTest('Dockstore Workflow Run Submitted'):
+            self.assertEqual(status, 'Submitted')
+        with self.subTest('Dockstore Workflow Run Responds with DRS.'):
+            self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
+
+        submission_id = response['submissionId']
+
+        # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
+        # also configurable manually via MD5SUM_TEST_TIMEOUT if held in a pending state
         start = time.time()
-        try:
-            response = run_workflow()
+        deadline = start + int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
+        table = f'platform-dev-178517.bdc.terra_md5_latency_{STAGE}'
+        while True:
+            response = check_workflow_status(submission_id=submission_id)
             status = response['status']
-            with self.subTest('Dockstore Workflow Run Submitted'):
-                self.assertEqual(status, 'Submitted')
-            with self.subTest('Dockstore Workflow Run Responds with DRS.'):
-                self.assertTrue(response['workflows'][0]['inputResolutions'][0]['value'].startswith('drs://'))
-
-            submission_id = response['submissionId']
-
-            # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
-            # also configurable manually via MD5SUM_TEST_TIMEOUT if held in a pending state
-            start = time.time()
-            deadline = start + int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
-            while True:
-                response = check_workflow_status(submission_id=submission_id)
-                status = response['status']
-                if  response['workflows'][0]['status'] == "Failed":
-                    raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')elif status == 'Done':
-                    break
+            if response['workflows'][0]['status'] == "Failed":
+                raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
+            elif status == 'Done':
+                break
+            else:
+                now = time.time()
+                if now < deadline:
+                    print(f"md5sum workflow state is: {response['workflows'][0]['status']}. "
+                          f"Checking again in 20 seconds.")
+                    time.sleep(20)
                 else:
-                    now = time.time()
-                    if now < deadline:
-                        print(f"md5sum workflow state is: {response['workflows'][0]['status']}. "
-                              f"Checking again in 20 seconds.")
-                        time.sleep(20)
-                    else:
-                        print(json.dumps(response, indent=4))
-                        raise RuntimeError('The md5sum workflow run timed out.  '
-                                           f'Expected 4 minutes, but took longer than '
-                                           f'{float(start - now) / 60.0} minutes.')
+                    print(json.dumps(response, indent=4))
+                    self.log_runtime(table, time.time() - start)
+                    raise RuntimeError('The md5sum workflow run timed out.  '
+                                       f'Expected 4 minutes, but took longer than '
+                                       f'{float(start - now) / 60.0} minutes.')
 
-            with self.subTest('Dockstore Workflow Run Completed Successfully'):
-                if response['workflows'][0]['status'] != "Succeeded":
-                    raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
-        finally:
-            table = f'platform-dev-178517.bdc.terra_md5_latency_{STAGE}'
-            client = Client()
-            client.add_row(table, time.time() - start)
+        with self.subTest('Dockstore Workflow Run Completed Successfully'):
+            if response['workflows'][0]['status'] != "Succeeded":
+                raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
+            else:
+                self.log_runtime(table, time.time() - start)
+
+    def log_runtime(self, table, start):
+        try:
+            Client().add_row(table, time.time() - start)
+        except Exception:
+            # We don't want failed logging to fail the whole test
+            logger.warning('Failed to log run tim to BigQuery')
+            pass
 
     def test_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
