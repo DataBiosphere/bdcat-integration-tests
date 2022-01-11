@@ -125,10 +125,10 @@ class TestGen3DataAccess(unittest.TestCase):
         while True:
             response = check_workflow_status(submission_id=submission_id)
             status = response['status']
-            if status == 'Done':
-                break
-            elif response['workflows'][0]['status'] == "Failed":
-                raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
+            if response['workflows'][0]['status'] == "Failed":
+                    raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
+                elif status == 'Done':
+                    break
             else:
                 now = time.time()
                 if now < deadline:
