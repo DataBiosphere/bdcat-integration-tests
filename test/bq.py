@@ -1,5 +1,6 @@
 import datetime
 import logging
+import time
 
 from google.api_core.exceptions import ServiceUnavailable
 from google.cloud import bigquery
@@ -28,3 +29,11 @@ class Client:
     def list_table(self, table_id, limit=10):
         q = self.client.query(f'SELECT * FROM `{table_id}` LIMIT {limit}')
         return list(q.result())
+
+
+def log_duration(table, start):
+    try:
+        Client().add_row(table, time.time() - start)
+    except Exception:
+        # We don't want failed logging to fail the whole test
+        log.warning('Failed to log run time to BigQuery', exc_info=True)

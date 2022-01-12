@@ -16,7 +16,7 @@ import terra_notebook_utils as tnu
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
-from test.bq import Client
+from test.bq import log_duration
 from test.infra.testmode import staging_only
 from test.utils import (run_workflow,
                         create_terra_workspace,
@@ -128,6 +128,7 @@ class TestGen3DataAccess(unittest.TestCase):
             response = check_workflow_status(submission_id=submission_id)
             status = response['status']
             if response['workflows'][0]['status'] == "Failed":
+                log_duration(table, time.time() - start)
                 raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
             elif status == 'Done':
                 break
@@ -139,24 +140,15 @@ class TestGen3DataAccess(unittest.TestCase):
                     time.sleep(20)
                 else:
                     print(json.dumps(response, indent=4))
-                    self.log_runtime(table, time.time() - start)
+                    log_duration(table, time.time() - start)
                     raise RuntimeError('The md5sum workflow run timed out.  '
                                        f'Expected 4 minutes, but took longer than '
                                        f'{float(start - now) / 60.0} minutes.')
 
+        log_duration(table, time.time() - start)
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
             if response['workflows'][0]['status'] != "Succeeded":
                 raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
-            else:
-                self.log_runtime(table, time.time() - start)
-
-    def log_runtime(self, table, start):
-        try:
-            Client().add_row(table, time.time() - start)
-        except Exception:
-            # We don't want failed logging to fail the whole test
-            logger.warning('Failed to log run tim to BigQuery')
-            pass
 
     def test_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
