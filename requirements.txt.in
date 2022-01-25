@@ -6,3 +6,4 @@ terra-notebook-utils==0.8.1
 flake8==3.8.3
 selenium==3.141.0
 pyjwt==1.7.1
+google-cloud-bigquery==2.31.0
