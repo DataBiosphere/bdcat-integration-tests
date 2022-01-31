@@ -123,7 +123,7 @@ class TestGen3DataAccess(unittest.TestCase):
         # also configurable manually via MD5SUM_TEST_TIMEOUT if held in a pending state
         start = time.time()
         deadline = start + int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
-        table = f'platform-dev-178517.bdc.terra_md5_latency_{STAGE}'
+        table = f'platform-dev-178517.bdc.terra_md5_latency_min_{STAGE}'
         while True:
             response = check_workflow_status(submission_id=submission_id)
             status = response['status']

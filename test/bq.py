@@ -18,9 +18,9 @@ class Client:
         self.client = bigquery.Client(project=project, credentials=credentials)
 
     @retry(errors={ServiceUnavailable})
-    def add_row(self, table_id: str, duration):
+    def add_row(self, table_id: str, duration: float):
         rows_to_insert = [
-            {'t': str(datetime.datetime.now()), 'd': round(duration)}
+            {'t': str(datetime.datetime.now()), 'd': duration}
         ]
         errors = self.client.insert_rows_json(table_id, rows_to_insert)
         if errors:
@@ -33,7 +33,8 @@ class Client:
 
 def log_duration(table, start):
     try:
-        Client().add_row(table, time.time() - start)
+        # Track time in minutes
+        Client().add_row(table, (time.time() - start) / 60)
     except Exception:
         # We don't want failed logging to fail the whole test
         log.warning('Failed to log run time to BigQuery', exc_info=True)
