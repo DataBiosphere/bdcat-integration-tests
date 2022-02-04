@@ -1,8 +1,9 @@
 google-resumable-media>=0.7.1
-google-cloud-storage>=1.27.0
+google-cloud-storage>=1.27.0, <2
 gen3==2.2.3
-requests==2.24.0
-terra-notebook-utils==0.8.1
+requests
+terra-notebook-utils==0.9.2
 flake8==3.8.3
 selenium==3.141.0
 pyjwt==1.7.1
+google-cloud-bigquery==2.31.0

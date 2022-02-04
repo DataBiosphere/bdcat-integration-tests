@@ -44,7 +44,11 @@ RUN virtualenv -p python3.8 venv
 
 COPY requirements.txt /opt/.
 
-RUN /venv/bin/pip install -r /opt/requirements.txt \
+# Later versions of pip use fancy dependency resolver which is leading to
+# dependency hell
+RUN venv/bin/pip install pip==20.2
+
+RUN venv/bin/pip install -r /opt/requirements.txt \
     --no-cache-dir --disable-pip-version-check
 
 # For `make lint` to work without special considerations

@@ -9,13 +9,14 @@ import requests
 import datetime
 import warnings
 import base64
-import random
 
 import terra_notebook_utils as tnu
+
 
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
+from test.bq import log_duration
 from test.infra.testmode import staging_only
 from test.utils import (run_workflow,
                         create_terra_workspace,
@@ -120,22 +121,31 @@ class TestGen3DataAccess(unittest.TestCase):
 
         # md5sum should run for about 4 minutes, but may take far longer(?); give a generous timeout
         # also configurable manually via MD5SUM_TEST_TIMEOUT if held in a pending state
-        timeout = twenty_minutes = int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
-        while status != 'Done':
+        start = time.time()
+        deadline = start + int(os.environ.get('MD5SUM_TEST_TIMEOUT', 60 * 60))
+        table = f'platform-dev-178517.bdc.terra_md5_latency_min_{STAGE}'
+        while True:
             response = check_workflow_status(submission_id=submission_id)
-            time.sleep(20)
-            timeout -= 20
             status = response['status']
             if response['workflows'][0]['status'] == "Failed":
+                log_duration(table, time.time() - start)
                 raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
+            elif status == 'Done':
+                break
+            else:
+                now = time.time()
+                if now < deadline:
+                    print(f"md5sum workflow state is: {response['workflows'][0]['status']}. "
+                          f"Checking again in 20 seconds.")
+                    time.sleep(20)
+                else:
+                    print(json.dumps(response, indent=4))
+                    log_duration(table, time.time() - start)
+                    raise RuntimeError('The md5sum workflow run timed out.  '
+                                       f'Expected 4 minutes, but took longer than '
+                                       f'{float(start - now) / 60.0} minutes.')
 
-            print(f"md5sum workflow state is: {response['workflows'][0]['status']}.  Checking again in 20 seconds.")
-            if timeout < 0:
-                print(json.dumps(response, indent=4))
-                raise RuntimeError('The md5sum workflow run timed out.  '
-                                   f'Expected 4 minutes, but took longer than '
-                                   f'{float(twenty_minutes - timeout) / 60.0} minutes.')
-
+        log_duration(table, time.time() - start)
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
             if response['workflows'][0]['status'] != "Succeeded":
                 raise RuntimeError(f'The md5sum workflow did not succeed:\n{json.dumps(response, indent=4)}')
@@ -150,7 +160,8 @@ class TestGen3DataAccess(unittest.TestCase):
             self.assertTrue(response['createdBy'] == 'biodata.integration.test.mule@gmail.com')
 
         with self.subTest('Import static pfb into the terra workspace.'):
-            response = import_pfb(workspace=workspace_name)
+            response = import_pfb(workspace=workspace_name,
+                                  pfb_file='https://cdistest-public-test-bucket.s3.amazonaws.com/export_2020-06-02T17_33_36.avro')
             self.assertTrue('jobId' in response)
 
         with self.subTest('Check on the import static pfb job status.'):
@@ -166,7 +177,8 @@ class TestGen3DataAccess(unittest.TestCase):
         with self.subTest('Delete the terra workspace.'):
             response = delete_terra_workspace(workspace=workspace_name)
             if not response.ok:
-                raise RuntimeError(f'Could not delete the workspace "{workspace_name}": [{response.status_code}] {response}')
+                raise RuntimeError(
+                    f'Could not delete the workspace "{workspace_name}": [{response.status_code}] {response}')
             if response.status_code != 202:
                 logger.critical(f'Response {response.status_code} has changed: {response}')
             response = delete_terra_workspace(workspace=workspace_name)

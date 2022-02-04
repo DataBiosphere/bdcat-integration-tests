@@ -1,4 +1,4 @@
-image: quay.io/biocat/bdcat-integration-tests:0.1
+image: quay.io/biocat/bdcat-integration-tests:0.2
 
 stages:
   - test
@@ -12,6 +12,9 @@ before_script:
   - date && date -u
   - source environment
   - make lint
+  - echo -n ${ENCODED_GOOGLE_APPLICATION_CREDENTIALS} | base64 -d > ${CI_PROJECT_DIR}/gcp-creds.json
+  # Don't set GOOGLE_APPLICATION_CREDENTIALS to so that some tests are still
+  # unauthenticated. Use directly when needed.
 
 after_script:
   - /venv/bin/python scripts/post_to_slack.py
