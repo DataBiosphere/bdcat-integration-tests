@@ -31,10 +31,10 @@ class Client:
         return list(q.result())
 
 
-def log_duration(table, start):
+def log_duration(table, duration):
     try:
         # Track time in minutes
-        Client().add_row(table, (time.time() - start) / 60)
+        Client().add_row(table, duration / 60)
     except Exception:
         # We don't want failed logging to fail the whole test
         log.warning('Failed to log run time to BigQuery', exc_info=True)
