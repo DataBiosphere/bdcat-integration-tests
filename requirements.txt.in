@@ -1,8 +1,8 @@
 google-resumable-media>=0.7.1
 google-cloud-storage>=1.27.0
 gen3==2.2.3
-requests==2.24.0
-terra-notebook-utils==0.8.1
+requests
+terra-notebook-utils
 flake8==3.8.3
 selenium==3.141.0
 pyjwt==1.7.1
