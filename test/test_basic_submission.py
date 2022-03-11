@@ -143,7 +143,7 @@ class TestGen3DataAccess(unittest.TestCase):
                     log_duration(table, time.time() - start)
                     raise RuntimeError('The md5sum workflow run timed out.  '
                                        f'Expected 4 minutes, but took longer than '
-                                       f'{float(start - now) / 60.0} minutes.')
+                                       f'{float(now - start) / 60.0} minutes.')
 
         log_duration(table, time.time() - start)
         with self.subTest('Dockstore Workflow Run Completed Successfully'):
@@ -286,4 +286,4 @@ class TestGen3DataAccess(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
