@@ -196,6 +196,7 @@ class TestGen3DataAccess(unittest.TestCase):
         tnu.drs.head('drs://dg.712C/04fbb96d-68c9-4922-801e-9b1350be3b94',
                      workspace_name='DRS-Test-Workspace', workspace_namespace=BILLING_PROJECT)
 
+    @unittest.skip('Website syntax has changed.  This test needs to be updated.')
     @staging_only
     def test_selenium_RAS_login(self):
         from selenium import webdriver
