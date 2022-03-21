@@ -31,7 +31,7 @@ after_script:
 staging__basic_submission:
   <<: *staging_job
   script:
-    - /venv/bin/python test/test_basic_submission.py
+    - timeout -s SIGINT 115m /venv/bin/python test/test_basic_submission.py
 
 staging__version_check:
   <<: *staging_job
@@ -43,7 +43,7 @@ prod__basic_submission:
   variables:
     BDCAT_STAGE: prod
   script:
-    - /venv/bin/python test/test_basic_submission.py
+    - timeout -s SIGINT 115m /venv/bin/python test/test_basic_submission.py
   except:
     - master
     - staging
