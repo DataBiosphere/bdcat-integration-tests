@@ -47,19 +47,18 @@ class Client:
 
     def log_test_results(self, test_name, status, timestamp, create=False):
         table_id = f'platform-dev-178517.bdc.integration_tests_{test_name}'
-        if status == 'success':
-            field = 'u'
-        elif status in ('failure', 'error'):
-            field = 'd'
-        elif status == 'skip':
-            field = 'm'
-        else:
-            raise ValueError(f'Unexpected status: {status!r} for test: {test_name!r}')
-        row = {f: (1 if f == field else 0) for f in ('u', 'd', 'm')}
-        row['t'] = str(timestamp)
-        if create:
-            self.create_test_table(table_id)
-        self.add_row(table_id, row)
+        if status != 'skip':
+            if status == 'success':
+                field = 'u'
+            elif status in ('failure', 'error'):
+                field = 'd'
+            else:
+                raise ValueError(f'Unexpected status: {status!r} for test: {test_name!r}')
+            row = {f: (1 if f == field else 0) for f in ('u', 'd', 'm')}
+            row['t'] = str(timestamp)
+            if create:
+                self.create_test_table(table_id)
+            self.add_row(table_id, row)
 
 
 def log_duration(table, duration):
