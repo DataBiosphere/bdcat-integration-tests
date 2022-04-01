@@ -5,6 +5,9 @@ import unittest
 import os
 import json
 import time
+from typing import Dict
+from unittest import TextTestRunner, TextTestResult
+
 import requests
 import datetime
 import warnings
@@ -16,7 +19,7 @@ import terra_notebook_utils as tnu
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
 sys.path.insert(0, pkg_root)  # noqa
 
-from test.bq import log_duration
+from test.bq import log_duration, Client
 from test.infra.testmode import staging_only
 from test.utils import (run_workflow,
                         create_terra_workspace,
@@ -286,5 +289,55 @@ class TestGen3DataAccess(unittest.TestCase):
     #     # import_drs_from_gen3('drs://dg.712C/b7a10338-6fb6-4201-adde-0ee933e069bc')
 
 
+class SaveResult(TextTestResult):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tests_run: Dict[unittest.TestCase, str] = {}
+
+    def startTest(self, test):
+        super().startTest(test)
+        self.tests_run[test] = 'started'
+
+    def addSuccess(self, test) -> None:
+        super().addSuccess(test)
+        self.tests_run[test] = 'success'
+
+    def addFailure(self, test, err) -> None:
+        super().addFailure(test, err)
+        self.tests_run[test] = 'failure'
+
+    def addError(self, test, err) -> None:
+        super().addError(test, err)
+        self.tests_run[test] = 'error'
+
+    def addSkip(self, test, reason) -> None:
+        super().addSkip(test, reason)
+        self.tests_run[test] = 'skip'
+
+    def addUnexpectedSuccess(self, test) -> None:
+        super().addUnexpectedSuccess(test)
+        self.tests_run[test] = 'failure'
+
+    def addExpectedFailure(self, test, err) -> None:
+        super().addExpectedFailure(test, err)
+        self.tests_run[test] = 'success'
+
+
+class SaveResultRunner(TextTestRunner):
+    resultclass = SaveResult
+
+
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    test_run = unittest.main(verbosity=2, exit=False, testRunner=SaveResultRunner)
+    results: SaveResult = test_run.result
+    timestamp = datetime.datetime.now()
+    client = Client()
+    for test, status in results.tests_run.items():
+        # Unfortunately this is the only way to get the test method name from the TestCase
+        test_name = test._testMethodName
+        try:
+            # To create tables, skip all tests and set create to True:
+            client.log_test_results(test_name, status, timestamp, create=False)
+        except Exception as e:
+            logger.exception('Failed to log test %r', test, exc_info=e)
