@@ -155,7 +155,7 @@ class TestGen3DataAccess(unittest.TestCase):
 
     def test_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
-        workspace_name = f'drs_test_{time_stamp}_delete_me'
+        workspace_name = f'integration_test_pfb_gen3_to_terra_{time_stamp}_delete_me'
 
         with self.subTest('Create a terra workspace.'):
             response = create_terra_workspace(workspace=workspace_name)
