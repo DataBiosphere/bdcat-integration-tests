@@ -275,7 +275,7 @@ def import_pfb(workspace, pfb_file):
 # the workspace may be deleted too soon, orphaning the job
 @retry(error_codes={500, 502, 503, 504},
        errors={HTTPError, ConnectionError},
-       intervals=[1, 1, 2, 4, 8, 16, 32, 64]) 
+       intervals=[1, 1, 2, 4, 8, 16, 32, 64])
 def pfb_job_status_in_terra(workspace, job_id):
     endpoint = f'{ORC_DOMAIN}/api/workspaces/{BILLING_PROJECT}/{workspace}/importPFB/{job_id}'
     token = gs.get_access_token()
