@@ -155,7 +155,7 @@ class TestGen3DataAccess(unittest.TestCase):
 
     def test_pfb_handoff_from_gen3_to_terra(self):
         time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
-        workspace_name = f'drs_test_{time_stamp}_delete_me'
+        workspace_name = f'integration_test_pfb_gen3_to_terra_{time_stamp}_delete_me'
 
         with self.subTest('Create a terra workspace.'):
             response = create_terra_workspace(workspace=workspace_name)
@@ -341,3 +341,4 @@ if __name__ == "__main__":
             client.log_test_results(test_name, status, timestamp, create=False)
         except Exception as e:
             logger.exception('Failed to log test %r', test, exc_info=e)
+    sys.exit(not results.wasSuccessful())
