@@ -5,6 +5,11 @@ import os
 import sys
 import argparse
 
+pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # noqa
+sys.path.insert(0, pkg_root)  # noqa
+
+from test.utils import retry
+
 PRIVATE_TOKEN = os.environ['GITLAB_READ_TOKEN']
 TOKEN = os.environ['GITLAB_TRIGGER_TOKEN']
 DEFAULT_HOST = 'https://biodata-integration-tests.net'
@@ -12,6 +17,7 @@ DEFAULT_BRANCH = 'master'
 DEFAULT_PROJECT_NUM = 3
 
 
+@retry(error_codes={500, 502, 503, 504}, errors={requests.exceptions.HTTPError, ConnectionError})
 def get_status(pipeline, host=DEFAULT_HOST, project=DEFAULT_PROJECT_NUM):
     job_status_url = f'{host}/api/v4/projects/{project}/pipelines/{pipeline}'
     response = requests.get(job_status_url, headers={'PRIVATE-TOKEN': PRIVATE_TOKEN})
