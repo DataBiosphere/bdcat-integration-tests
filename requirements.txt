@@ -50,7 +50,7 @@ pyasn1-modules==0.2.8
 pycodestyle==2.6.0
 pydot==1.4.2
 pyflakes==2.2.0
-PyJWT==1.7.1
+PyJWT==2.4.0
 pylint==1.7.2
 pyparsing==3.0.7
 pyrsistent==0.18.1
