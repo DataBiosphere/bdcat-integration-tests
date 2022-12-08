@@ -8,7 +8,7 @@ attrs==21.4.0
 backoff==1.11.1
 bgzip==0.3.5
 cachetools==5.0.0
-certifi==2021.10.8
+certifi==2022.12.7
 charset-normalizer==2.0.11
 cli-builder==0.1.5
 click==8.0.3
