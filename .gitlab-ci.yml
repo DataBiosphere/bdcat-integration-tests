@@ -25,7 +25,6 @@ after_script:
     BDCAT_STAGE: staging
     TERRA_DEPLOYMENT_ENV: alpha
   except:
-    - schedules
     - prod
 
 staging__basic_submission:
